@@ -1,5 +1,6 @@
 package br.com.ifba.usuario.view;
 import javax.swing.JOptionPane;
+import br.com.ifba.usuario.validar.ValidadorUsuario;
 
 public class TelaCadastroUsuario extends javax.swing.JFrame {
     
@@ -182,13 +183,25 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
             || telefone.isEmpty() || email.isEmpty() || login.isEmpty()
             || senha.isEmpty() || confirmarSenha.isEmpty()) {
 
+        // 1) algum campo vazio
         JOptionPane.showMessageDialog(this, "Preencha todos os campos.",
                 "Erro", JOptionPane.ERROR_MESSAGE);
+
     } else if (!senha.equals(confirmarSenha)) {
 
+        // 2) senha diferente de confirmar senha
         JOptionPane.showMessageDialog(this, "As senhas não coincidem.",
                 "Erro", JOptionPane.ERROR_MESSAGE);
+
+    } else if (ValidadorUsuario.contemPalavraProibida(login)) {
+
+        // 3) login contém palavra proibida
+        JOptionPane.showMessageDialog(this, "Login contém palavra não permitida.",
+                "Erro", JOptionPane.ERROR_MESSAGE);
+
     } else {
+
+        // 4) tudo certo
         JOptionPane.showMessageDialog(this, "Cadastro realizado com sucesso!",
                 "Cadastro", JOptionPane.INFORMATION_MESSAGE);
     }
