@@ -229,7 +229,12 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
     }//GEN-LAST:event_txtDatadeNascimentoActionPerformed
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
-        
+
+    // fecha e libera da memória a janela atual (a tela de cadastro)
+    this.dispose();
+    // abre a tela de login apartir da tela de cadastro
+    new br.com.ifba.login.view.TelaLogin().setVisible(true);
+
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     /**
