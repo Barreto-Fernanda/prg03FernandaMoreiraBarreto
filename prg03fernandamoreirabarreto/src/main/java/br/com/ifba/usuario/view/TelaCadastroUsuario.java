@@ -1,6 +1,8 @@
 package br.com.ifba.usuario.view;
 import javax.swing.JOptionPane;
 import br.com.ifba.usuario.validar.ValidadorUsuario;
+import br.com.ifba.usuario.entity.Usuario;
+import br.com.ifba.login.view.TelaLogin;
 
 public class TelaCadastroUsuario extends javax.swing.JFrame {
     
@@ -81,6 +83,7 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
         btnCancelar.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
         btnCancelar.setText("Cancelar");
+        btnCancelar.addActionListener(this::btnCancelarActionPerformed);
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Feminino", "Masculino", "Outro" }));
         jComboBox1.addActionListener(this::jComboBox1ActionPerformed);
@@ -201,10 +204,20 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
     } else {
 
-        // 4) tudo certo
-        JOptionPane.showMessageDialog(this, "Cadastro realizado com sucesso!",
-                "Cadastro", JOptionPane.INFORMATION_MESSAGE);
-    }
+    // 4) tudo certo: cria o objeto de domínio e preenche com os dados capturados
+    Usuario usuario = new Usuario();
+    usuario.nome = nome;
+    usuario.cpf = cpf;
+    usuario.genero = jComboBox1.getSelectedItem().toString();
+    usuario.dataNascimento = dataNascimento;
+    usuario.telefone = telefone;
+    usuario.email = email;
+    usuario.login = login;
+    usuario.senha = senha;
+
+    JOptionPane.showMessageDialog(this, "Cadastro realizado com sucesso!",
+            "Cadastro", JOptionPane.INFORMATION_MESSAGE);
+}
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
@@ -214,6 +227,10 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
     private void txtDatadeNascimentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDatadeNascimentoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDatadeNascimentoActionPerformed
+
+    private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
+        
+    }//GEN-LAST:event_btnCancelarActionPerformed
 
     /**
      * @param args the command line arguments
