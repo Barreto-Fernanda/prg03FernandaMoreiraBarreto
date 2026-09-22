@@ -182,40 +182,43 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
     String senha = new String(txtSenha.getPassword());
     String confirmarSenha = new String(txtConfirmarSenha.getPassword());
 
-    if (nome.isEmpty() || cpf.isEmpty() || dataNascimento.isEmpty()
-            || telefone.isEmpty() || email.isEmpty() || login.isEmpty()
-            || senha.isEmpty() || confirmarSenha.isEmpty()) {
+    if (!ValidadorUsuario.camposPreenchidos(nome, cpf, dataNascimento, telefone, email, login, senha, confirmarSenha)) {
 
-        // 1) algum campo vazio
         JOptionPane.showMessageDialog(this, "Preencha todos os campos.",
                 "Erro", JOptionPane.ERROR_MESSAGE);
 
-    } else if (!senha.equals(confirmarSenha)) {
+    } else if (!ValidadorUsuario.cpfValido(cpf)) {
 
-        // 2) senha diferente de confirmar senha
+        JOptionPane.showMessageDialog(this, "CPF inválido. Use apenas 11 números.",
+                "Erro", JOptionPane.ERROR_MESSAGE);
+
+    } else if (!ValidadorUsuario.senhaForte(senha)) {
+
+        JOptionPane.showMessageDialog(this, "Senha muito curta. Use ao menos 6 caracteres.",
+                "Erro", JOptionPane.ERROR_MESSAGE);
+
+    } else if (!ValidadorUsuario.senhasCoincidem(senha, confirmarSenha)) {
+
         JOptionPane.showMessageDialog(this, "As senhas não coincidem.",
                 "Erro", JOptionPane.ERROR_MESSAGE);
 
     } else if (ValidadorUsuario.contemPalavraProibida(login)) {
 
-        // 3) login contém palavra proibida
         JOptionPane.showMessageDialog(this, "Login contém palavra não permitida.",
                 "Erro", JOptionPane.ERROR_MESSAGE);
 
     } else {
 
-    // 4) tudo certo: cria o objeto usando o construtor com parâmetros
-    Usuario usuario = new Usuario(nome, cpf, login, senha);
-    usuario.setGenero(jComboBox1.getSelectedItem().toString());
-    usuario.setDataNascimento(dataNascimento);
-    usuario.setTelefone(telefone);
-    usuario.setEmail(email);
+        Usuario usuario = new Usuario(nome, cpf, login, senha);
+        usuario.setGenero(jComboBox1.getSelectedItem().toString());
+        usuario.setDataNascimento(dataNascimento);
+        usuario.setTelefone(telefone);
+        usuario.setEmail(email);
 
-    // exibe os dados usando os getters, não os atributos direto
-    JOptionPane.showMessageDialog(this,
-            "Usuário " + usuario.getNome() + " cadastrado com sucesso!",
-            "Cadastro", JOptionPane.INFORMATION_MESSAGE);
-}
+        JOptionPane.showMessageDialog(this,
+                "Usuário " + usuario.getNome() + " cadastrado com sucesso!",
+                "Cadastro", JOptionPane.INFORMATION_MESSAGE);
+    }
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
