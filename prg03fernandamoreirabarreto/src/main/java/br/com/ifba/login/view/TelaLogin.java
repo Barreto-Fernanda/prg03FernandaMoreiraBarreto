@@ -125,15 +125,15 @@ public class TelaLogin extends javax.swing.JFrame {
     String loginDigitado = txtLogin.getText();
     String senhaDigitada = new String(txtSenha.getPassword());
 
-    // cria o objeto de domínio e preenche login e senha
+    // cria o objeto de domínio e preenche login e senha usando os setters
     Usuario usuario = new Usuario();
-    usuario.login = loginDigitado;
-    usuario.senha = senhaDigitada;
+    usuario.setLogin(loginDigitado);
+    usuario.setSenha(senhaDigitada);
 
-    // exibe os dados vindos do objeto, e não mais direto dos campos de texto
+    // exibe os dados vindos do objeto, usando os getters
     lblResultado.setText(
-        "Login digitado: " + usuario.login + "\n" +
-        "Senha digitada: " + usuario.senha
+        "Login digitado: " + usuario.getLogin() + "\n" +
+        "Senha digitada: " + usuario.getSenha()
     );
     }//GEN-LAST:event_btnEntrarActionPerformed
 
