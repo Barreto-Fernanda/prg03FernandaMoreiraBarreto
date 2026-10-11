@@ -3,13 +3,24 @@ import javax.swing.JOptionPane;
 import br.com.ifba.usuario.validar.ValidadorUsuario;
 import br.com.ifba.usuario.entity.Usuario;
 import br.com.ifba.login.view.TelaLogin;
+import br.com.ifba.usuario.repository.RepositorioUsuarioEmMemoria;
 
 public class TelaCadastroUsuario extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaCadastroUsuario.class.getName());
 
-    public TelaCadastroUsuario() {
+        // Repositório compartilhado, entregue pela TelaLogin
+    private final RepositorioUsuarioEmMemoria repositorio;
+
+    // Usado pela TelaLogin: recebe o repositório compartilhado
+    public TelaCadastroUsuario(RepositorioUsuarioEmMemoria repositorio) {
+        this.repositorio = repositorio;
         initComponents();
+    }
+
+    // Mantido para o main desta tela continuar funcionando (cria um repositório próprio)
+    public TelaCadastroUsuario() {
+        this(new RepositorioUsuarioEmMemoria());
     }
 
     /**
@@ -207,13 +218,15 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(this, "Login contém palavra não permitida.",
                 "Erro", JOptionPane.ERROR_MESSAGE);
 
-    } else {
+        } else {
 
         Usuario usuario = new Usuario(nome, cpf, login, senha);
         usuario.setGenero(jComboBox1.getSelectedItem().toString());
         usuario.setDataNascimento(dataNascimento);
         usuario.setTelefone(telefone);
         usuario.setEmail(email);
+
+        repositorio.cadastrar(usuario); // guarda no repositório, em vez de perder o objeto
 
         JOptionPane.showMessageDialog(this,
                 "Usuário " + usuario.getNome() + " cadastrado com sucesso!",
