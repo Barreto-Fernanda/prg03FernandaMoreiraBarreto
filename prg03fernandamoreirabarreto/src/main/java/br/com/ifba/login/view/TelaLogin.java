@@ -1,15 +1,16 @@
 package br.com.ifba.login.view;
 import br.com.ifba.usuario.entity.Usuario;
 import javax.swing.JOptionPane;
+import br.com.ifba.usuario.repository.RepositorioUsuarioEmMemoria;
 
 
 public class TelaLogin extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaLogin.class.getName());
 
-    /**
-     * Creates new form TelaLogin
-     */
+    // Repositório único, compartilhado com a tela de cadastro
+    private final RepositorioUsuarioEmMemoria repositorio = new RepositorioUsuarioEmMemoria();
+    
     public TelaLogin() {
         initComponents();
     }
@@ -143,11 +144,12 @@ public class TelaLogin extends javax.swing.JFrame {
     }//GEN-LAST:event_txtSenhaActionPerformed
 
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
-        new br.com.ifba.usuario.view.TelaCadastroUsuario().setVisible(true);
+        // Entrega o repositório à tela de cadastro, para os usuários cadastrados ficarem guardados nele
+        new br.com.ifba.usuario.view.TelaCadastroUsuario(repositorio).setVisible(true);
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
     /**
-     * @param args the command line arguments
+     * @param args the comsmand line arguments
      */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
