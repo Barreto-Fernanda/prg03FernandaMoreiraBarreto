@@ -462,3 +462,11 @@
 
 &#x20; todos esses valores já estão disponíveis de uma vez (ex.: dados capturados da Tela de Cadastro).
 
+
+
+\## Busca por login: List vs Map
+
+\- Com `List` (for): percorre os usuários um a um até achar; com 10 usuários são poucas comparações (imperceptível), mas com 10 mil pode chegar a 10 mil comparações por busca, e o tempo cresce junto com a lista.
+
+\- Com `Map` (HashMap): o login é a chave e o Java vai direto ao usuário, sem percorrer nada; o tempo é praticamente o mesmo com 10 ou com 10 mil usuários.
+
