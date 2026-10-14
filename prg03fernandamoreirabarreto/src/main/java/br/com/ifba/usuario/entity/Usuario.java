@@ -1,31 +1,56 @@
 package br.com.ifba.usuario.entity;
 
-// Contrato que obriga a classe a ter o método autenticar(login, senha)
 import br.com.ifba.usuario.interfaces.Autenticavel;
-// Usado no equals/hashCode: compara e calcula hash sem estourar erro se o valor for null
+// Anotações da JPA (pacote jakarta, e não javax)
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.util.Objects;
 
 // Classe de domínio: representa um usuário do sistema.
 // Atributos privados (encapsulados): acesso só via getters/setters.
-// Atendente, TecnicoLaboratorio e ResponsavelTecnico herdam desta classe.
+// @Entity: o Hibernate passa a tratar esta classe como uma tabela do banco.
+// @Table: nome da tabela (sem isso seria "Usuario", o nome da classe).
+@Entity
+@Table(name = "usuario")
 public class Usuario implements Autenticavel {
 
-    // Dados pessoais e de acesso do usuário (privados, ninguém de fora mexe direto)
+    // Chave primária. O banco gera o valor sozinho (auto incremento no MySQL).
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // nullable = false: a coluna não aceita valor vazio (NULL)
+    @Column(nullable = false, length = 120)
     private String nome;
+
+    // unique = true: o banco impede dois usuários com o mesmo CPF
+    @Column(nullable = false, unique = true, length = 11)
     private String cpf;
+
     private String genero;
+
+    // name: nome da coluna no banco (sem isso seria "dataNascimento")
+    @Column(name = "data_nascimento")
     private String dataNascimento;
+
     private String telefone;
     private String email;
+
+    // O login identifica o usuário no sistema, então também é único
+    @Column(nullable = false, unique = true, length = 50)
     private String login;
+
+    @Column(nullable = false)
     private String senha;
 
-    // Construtor vazio: cria um Usuario "em branco", para preencher depois com os setters
+    // Construtor vazio: a JPA EXIGE um (ela cria o objeto vazio e depois preenche)
     public Usuario() {
     }
 
-    // Construtor com os dados principais: já cria o usuário preenchido
-    // (sobrecarga: mesmo nome do construtor acima, parâmetros diferentes)
     public Usuario(String nome, String cpf, String login, String senha) {
         this.nome = nome;
         this.cpf = cpf;
@@ -33,7 +58,8 @@ public class Usuario implements Autenticavel {
         this.senha = senha;
     }
 
-    // Getters (devolvem o valor) e setters (guardam um novo valor) de cada atributo
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
     public String getCpf() { return cpf; }
@@ -51,8 +77,6 @@ public class Usuario implements Autenticavel {
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }
 
-    // Cumpre o contrato da interface Autenticavel: compara o que foi digitado
-    // (parâmetros) com o que está guardado neste objeto (this.login, this.senha)
     @Override
     public boolean autenticar(String login, String senha) {
         return this.login.equals(login) && this.senha.equals(senha);
@@ -67,22 +91,17 @@ public class Usuario implements Autenticavel {
     // no sistema (é único e é a chave de busca do repositório).
     @Override
     public boolean equals(Object o) {
-        // Atalho: se for exatamente o mesmo objeto na memória, já é igual
         if (this == o) {
-            return true; // é o mesmo objeto
+            return true;
         }
-        // Se não for um Usuario (ou for null), não pode ser igual
         if (!(o instanceof Usuario)) {
-            return false; // não é um Usuario (ou é null)
+            return false;
         }
-        // Converte para Usuario (seguro: o instanceof acima já garantiu o tipo)
         Usuario outro = (Usuario) o;
-        // Só o login decide a igualdade; os outros campos são ignorados
         return Objects.equals(this.login, outro.login);
     }
 
-    // Regra do Java: objetos iguais precisam ter o mesmo hashCode (use o mesmo campo)
-    // Coleções como HashMap usam o hashCode para achar rápido onde o objeto está guardado
+    // Objetos iguais precisam ter o mesmo hashCode (usa o mesmo campo do equals)
     @Override
     public int hashCode() {
         return Objects.hash(login);
