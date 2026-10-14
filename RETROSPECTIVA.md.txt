@@ -1,0 +1,1 @@
+Não deveriam aparecer na listagem: a senha, id, genero e dataNascimento, que são dados pessoais desnecessários para identificar o usuário numa lista.
