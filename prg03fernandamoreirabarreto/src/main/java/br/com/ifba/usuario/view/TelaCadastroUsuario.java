@@ -3,25 +3,25 @@ import javax.swing.JOptionPane;
 import br.com.ifba.usuario.validar.ValidadorUsuario;
 import br.com.ifba.usuario.entity.Usuario;
 import br.com.ifba.login.view.TelaLogin;
-import br.com.ifba.usuario.repository.RepositorioUsuarioEmMemoria;
+import br.com.ifba.usuario.repository.RepositorioUsuarioJPA;
 
 public class TelaCadastroUsuario extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaCadastroUsuario.class.getName());
 
-        // Repositório compartilhado, entregue pela TelaLogin
-    private final RepositorioUsuarioEmMemoria repositorio;
+       // Repositório que grava no MySQL
+       private final RepositorioUsuarioJPA repositorio;
 
-    // Usado pela TelaLogin: recebe o repositório compartilhado
-    public TelaCadastroUsuario(RepositorioUsuarioEmMemoria repositorio) {
-        this.repositorio = repositorio;
-        initComponents();
-    }
+       // Usado pela TelaLogin: recebe o repositório compartilhado
+       public TelaCadastroUsuario(RepositorioUsuarioJPA repositorio) {
+           this.repositorio = repositorio;
+           initComponents();
+       }
 
-    // Mantido para o main desta tela continuar funcionando (cria um repositório próprio)
-    public TelaCadastroUsuario() {
-        this(new RepositorioUsuarioEmMemoria());
-    }
+       // Usado pelo main desta tela: cria o seu próprio repositório
+       public TelaCadastroUsuario() {
+           this(new RepositorioUsuarioJPA());
+       }
 
     /**
      * This method is called from within the constructor to initialize the form.

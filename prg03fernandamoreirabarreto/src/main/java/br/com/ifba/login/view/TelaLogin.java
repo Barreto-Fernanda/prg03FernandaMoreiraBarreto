@@ -1,15 +1,16 @@
 package br.com.ifba.login.view;
 import br.com.ifba.usuario.entity.Usuario;
 import javax.swing.JOptionPane;
-import br.com.ifba.usuario.repository.RepositorioUsuarioEmMemoria;
+import br.com.ifba.usuario.repository.RepositorioUsuarioJPA;
 
 
 public class TelaLogin extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaLogin.class.getName());
 
-    // Repositório único, compartilhado com a tela de cadastro
-    private final RepositorioUsuarioEmMemoria repositorio = new RepositorioUsuarioEmMemoria();
+    
+   // Repositório que grava no MySQL, compartilhado com a tela de cadastro
+   private final RepositorioUsuarioJPA repositorio = new RepositorioUsuarioJPA();
     
     public TelaLogin() {
         initComponents();
