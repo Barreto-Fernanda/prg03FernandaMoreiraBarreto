@@ -151,11 +151,36 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtBuscaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBuscaActionPerformed
-        // TODO add your handling code here:
+                // Apertar Enter dentro do campo de busca faz a mesma coisa que clicar em Buscar
+        btnBuscarActionPerformed(evt);
     }//GEN-LAST:event_txtBuscaActionPerformed
 
     private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
-        // TODO add your handling code here:
+                // 1. Pega o texto que foi digitado no campo de busca
+        String texto = txtBusca.getText();
+
+        try {
+            // 2. Pede ao repositório os usuários cujo nome contém esse texto
+            //    (a filtragem acontece no banco, com JPQL e WHERE)
+            List<Usuario> encontrados = repositorio.buscarPorNome(texto);
+
+            // 3. Mostra só os encontrados na tabela.
+            //    O preencherTabela também atualiza a lista "usuariosExibidos",
+            //    então Editar e Remover continuam agindo na linha certa da tabela filtrada.
+            preencherTabela(encontrados);
+
+            // 4. Se não achou ninguém, avisa (a tabela fica vazia)
+            if (encontrados.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Nenhum usuário encontrado.",
+                        "Busca", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (RuntimeException e) {
+            // Se o banco der erro, avisa em vez de a tela quebrar em silêncio
+            JOptionPane.showMessageDialog(this,
+                    "Não foi possível buscar os usuários: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnBuscarActionPerformed
 
     private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoActionPerformed

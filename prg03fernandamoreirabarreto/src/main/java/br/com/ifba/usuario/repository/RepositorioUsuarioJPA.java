@@ -44,6 +44,31 @@ public class RepositorioUsuarioJPA {
     }
 
     // EDITAR: confere o login, depois merge dentro de uma transação
+    
+        // BUSCAR: devolve os usuários cujo nome CONTÉM o texto digitado.
+    // Não diferencia maiúsculas de minúsculas ("ana" encontra "Ana Souza" e "MARIANA").
+    public List<Usuario> buscarPorNome(String texto) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            // Se vier null, trata como texto vazio; trim() tira espaços do começo e do fim
+            // (o campo de busca da tela tem espaços em branco por padrão)
+            String termo = (texto == null) ? "" : texto.trim().toLowerCase();
+
+            // WHERE filtra no próprio banco: só voltam os usuários que combinam.
+            // LOWER(u.nome) deixa o nome em minúsculas antes de comparar.
+            // LIKE com % dos dois lados significa "contém o texto em qualquer posição".
+            // :texto é um PARÂMETRO: o valor entra separado da consulta, e nunca é colado
+            // dentro do texto da consulta. Isso evita SQL injection.
+            return em.createQuery(
+                    "SELECT u FROM Usuario u WHERE LOWER(u.nome) LIKE :texto ORDER BY u.nome",
+                    Usuario.class)
+                    .setParameter("texto", "%" + termo + "%")
+                    .getResultList();
+        } finally {
+            em.close(); // sempre fecha, deu certo ou não
+        }
+    }
+    
     public Usuario atualizar(Usuario usuario) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
