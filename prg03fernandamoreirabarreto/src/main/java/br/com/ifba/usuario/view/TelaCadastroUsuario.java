@@ -3,24 +3,66 @@ import javax.swing.JOptionPane;
 import br.com.ifba.usuario.validar.ValidadorUsuario;
 import br.com.ifba.usuario.entity.Usuario;
 import br.com.ifba.login.view.TelaLogin;
-import br.com.ifba.usuario.repository.RepositorioUsuarioEmMemoria;
+import br.com.ifba.usuario.repository.RepositorioUsuarioJPA;
+import br.com.ifba.usuario.exception.LoginDuplicadoException;
 
 public class TelaCadastroUsuario extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaCadastroUsuario.class.getName());
 
-        // Repositório compartilhado, entregue pela TelaLogin
-    private final RepositorioUsuarioEmMemoria repositorio;
+       // Repositório que grava no MySQL
+       private final RepositorioUsuarioJPA repositorio;
 
-    // Usado pela TelaLogin: recebe o repositório compartilhado
-    public TelaCadastroUsuario(RepositorioUsuarioEmMemoria repositorio) {
-        this.repositorio = repositorio;
-        initComponents();
+       // Usado pela TelaLogin: recebe o repositório compartilhado
+       public TelaCadastroUsuario(RepositorioUsuarioJPA repositorio) {
+           this.repositorio = repositorio;
+           initComponents();
+       }
+
+       // Usado pelo main desta tela: cria o seu próprio repositório
+       public TelaCadastroUsuario() {
+           this(new RepositorioUsuarioJPA());
+       }
+       
+           // Guarda o usuário que está sendo editado.
+    // Fica null quando a tela é usada para cadastrar um usuário novo.
+    private Usuario usuarioEmEdicao = null;
+    
+        // Diz para onde o botão Cancelar deve voltar.
+    // true  = a tela foi aberta pelo login, então Cancelar volta para o login.
+    // false = a tela foi aberta pela listagem, então Cancelar só fecha esta janela.
+    private boolean voltarParaLogin = true;
+
+    // Permite que a listagem avise: "ao cancelar, basta fechar esta janela"
+    public void setVoltarParaLogin(boolean voltarParaLogin) {
+        this.voltarParaLogin = voltarParaLogin;
     }
 
-    // Mantido para o main desta tela continuar funcionando (cria um repositório próprio)
-    public TelaCadastroUsuario() {
-        this(new RepositorioUsuarioEmMemoria());
+    // Construtor usado pelo botão Editar da tela de listagem:
+    // recebe o repositório e o usuário escolhido, e abre a tela já preenchida
+    public TelaCadastroUsuario(RepositorioUsuarioJPA repositorio, Usuario usuarioEmEdicao) {
+        this.repositorio = repositorio;
+        this.usuarioEmEdicao = usuarioEmEdicao;
+        this.voltarParaLogin = false; // aberta pela listagem: Cancelar só fecha a janela
+        initComponents();   // desenha a tela
+        preencherCampos();  // coloca os dados do usuário nos campos
+        setTitle("Editar Usuário");               // muda o título da janela
+        btnCadastrar.setText("Salvar alterações"); // muda o texto do botão
+    }
+
+    // Copia os dados do usuário para os campos da tela
+    private void preencherCampos() {
+        txtNomeCompleto.setText(usuarioEmEdicao.getNome());
+        txtCpf.setText(usuarioEmEdicao.getCpf());
+        jComboBox1.setSelectedItem(usuarioEmEdicao.getGenero()); // escolhe o gênero na lista
+        txtDatadeNascimento.setText(usuarioEmEdicao.getDataNascimento());
+        txtTelefone.setText(usuarioEmEdicao.getTelefone());
+        txtEmail.setText(usuarioEmEdicao.getEmail());
+        txtLogin.setText(usuarioEmEdicao.getLogin());
+        // A senha entra nos dois campos para a validação da tela continuar passando.
+        // Se quiser trocar a senha, é só digitar outra nos dois.
+        txtSenha.setText(usuarioEmEdicao.getSenha());
+        txtConfirmarSenha.setText(usuarioEmEdicao.getSenha());
     }
 
     /**
@@ -184,6 +226,8 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
+        // TESTE TEMPORÁRIO: escreve no Output para confirmar que o clique chegou até aqui.
+        System.out.println("Clicou em Cadastrar");
     String nome = txtNomeCompleto.getText();
     String cpf = txtCpf.getText();
     String dataNascimento = txtDatadeNascimento.getText();
@@ -219,18 +263,58 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
                 "Erro", JOptionPane.ERROR_MESSAGE);
 
         } else {
+                // Descobre se a tela está sendo usada para EDITAR (usuarioEmEdicao preenchido)
+        // ou para CADASTRAR um usuário novo (usuarioEmEdicao é null)
+        boolean edicao = (usuarioEmEdicao != null);
 
-        Usuario usuario = new Usuario(nome, cpf, login, senha);
+        // Na edição, reaproveita o objeto que veio da listagem: ele já carrega o id do banco,
+        // e é esse id que faz o merge atualizar a linha certa em vez de criar outra.
+        // No cadastro novo, cria um objeto vazio (sem id; o banco gera o id sozinho).
+        Usuario usuario = edicao ? usuarioEmEdicao : new Usuario();
+
+        // Copia para o objeto o que está digitado na tela (vale para os dois casos)
+        usuario.setNome(nome);
+        usuario.setCpf(cpf);
         usuario.setGenero(jComboBox1.getSelectedItem().toString());
         usuario.setDataNascimento(dataNascimento);
         usuario.setTelefone(telefone);
         usuario.setEmail(email);
+        usuario.setLogin(login);
+        usuario.setSenha(senha);
 
-        repositorio.cadastrar(usuario); // guarda no repositório, em vez de perder o objeto
+        try {
+            if (edicao) {
+                repositorio.atualizar(usuario); // atualiza a linha no banco (merge)
+            } else {
+                repositorio.cadastrar(usuario); // insere uma linha nova no banco (persist)
+            }
 
-        JOptionPane.showMessageDialog(this,
-                "Usuário " + usuario.getNome() + " cadastrado com sucesso!",
-                "Cadastro", JOptionPane.INFORMATION_MESSAGE);
+            // Mensagem de sucesso, com o verbo certo para cada caso
+            JOptionPane.showMessageDialog(this,
+                    "Usuário " + usuario.getNome() + (edicao ? " atualizado" : " cadastrado") + " com sucesso!",
+                    "Cadastro", JOptionPane.INFORMATION_MESSAGE);
+
+            if (edicao) {
+                this.dispose(); // na edição, fecha esta tela e volta para a listagem
+            }
+            } catch (LoginDuplicadoException e) {
+            // Erro ESPERADO do negócio: o login já existe. Capturamos a nossa exceção
+            // e mostramos a mensagem que ela mesma montou (e.getMessage()).
+            // A tela não fecha e não mostra "sucesso": o usuário vê o problema e pode corrigir.
+            JOptionPane.showMessageDialog(this, e.getMessage(),
+                    "Login já cadastrado", JOptionPane.WARNING_MESSAGE);
+            txtLogin.requestFocus(); // leva o cursor para o campo do login
+            txtLogin.selectAll();    // deixa o texto selecionado, pronto para digitar outro
+        } catch (RuntimeException e) {
+            // Qualquer OUTRO erro inesperado (banco fora do ar, CPF repetido, etc.).
+            // Este catch precisa vir DEPOIS do específico: o Java testa os catch de cima
+            // para baixo, e RuntimeException aceitaria também a LoginDuplicadoException.
+            JOptionPane.showMessageDialog(this,
+                    "Não foi possível salvar o usuário: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+
+        
     }
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
@@ -244,10 +328,13 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
 
-    // fecha e libera da memória a janela atual (a tela de cadastro)
-    this.dispose();
-    // abre a tela de login apartir da tela de cadastro
-    new br.com.ifba.login.view.TelaLogin().setVisible(true);
+        // Fecha e libera da memória a janela atual
+        this.dispose();
+
+        // Só volta para a tela de login se a tela tiver sido aberta pelo login
+        if (voltarParaLogin) {
+            new br.com.ifba.login.view.TelaLogin().setVisible(true);
+        }
 
     }//GEN-LAST:event_btnCancelarActionPerformed
 
