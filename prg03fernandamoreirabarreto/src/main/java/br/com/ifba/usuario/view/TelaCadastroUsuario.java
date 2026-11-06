@@ -4,6 +4,7 @@ import br.com.ifba.usuario.validar.ValidadorUsuario;
 import br.com.ifba.usuario.entity.Usuario;
 import br.com.ifba.login.view.TelaLogin;
 import br.com.ifba.usuario.repository.RepositorioUsuarioJPA;
+import br.com.ifba.usuario.exception.LoginDuplicadoException;
 
 public class TelaCadastroUsuario extends javax.swing.JFrame {
     
@@ -296,8 +297,18 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
             if (edicao) {
                 this.dispose(); // na edição, fecha esta tela e volta para a listagem
             }
+            } catch (LoginDuplicadoException e) {
+            // Erro ESPERADO do negócio: o login já existe. Capturamos a nossa exceção
+            // e mostramos a mensagem que ela mesma montou (e.getMessage()).
+            // A tela não fecha e não mostra "sucesso": o usuário vê o problema e pode corrigir.
+            JOptionPane.showMessageDialog(this, e.getMessage(),
+                    "Login já cadastrado", JOptionPane.WARNING_MESSAGE);
+            txtLogin.requestFocus(); // leva o cursor para o campo do login
+            txtLogin.selectAll();    // deixa o texto selecionado, pronto para digitar outro
         } catch (RuntimeException e) {
-            // Se o banco recusar (por exemplo, login ou CPF repetido), avisa em vez de falhar em silêncio
+            // Qualquer OUTRO erro inesperado (banco fora do ar, CPF repetido, etc.).
+            // Este catch precisa vir DEPOIS do específico: o Java testa os catch de cima
+            // para baixo, e RuntimeException aceitaria também a LoginDuplicadoException.
             JOptionPane.showMessageDialog(this,
                     "Não foi possível salvar o usuário: " + e.getMessage(),
                     "Erro", JOptionPane.ERROR_MESSAGE);

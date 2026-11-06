@@ -2,16 +2,21 @@ package br.com.ifba.usuario.repository;
 
 import br.com.ifba.infrastructure.util.JPAUtil;
 import br.com.ifba.usuario.entity.Usuario;
+import br.com.ifba.usuario.exception.LoginDuplicadoException;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 
 // Grava e busca usuários no MySQL usando JPA
 public class RepositorioUsuarioJPA {
 
-    // CADASTRAR: persist dentro de uma transação
+    // CADASTRAR: confere o login, depois persist dentro de uma transação
     public void cadastrar(Usuario usuario) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
+            // Se o login já existir, este método lança a exceção e o código para aqui,
+            // antes de abrir a transação e antes de tentar gravar qualquer coisa
+            garantirLoginDisponivel(em, usuario);
+
             em.getTransaction().begin();
             em.persist(usuario);
             em.getTransaction().commit();
@@ -38,10 +43,13 @@ public class RepositorioUsuarioJPA {
         }
     }
 
-    // EDITAR: merge dentro de uma transação
+    // EDITAR: confere o login, depois merge dentro de uma transação
     public Usuario atualizar(Usuario usuario) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
+            // Na edição, o login só é "repetido" se pertencer a OUTRO usuário
+            garantirLoginDisponivel(em, usuario);
+
             em.getTransaction().begin();
             Usuario atualizado = em.merge(usuario);
             em.getTransaction().commit();
@@ -74,6 +82,34 @@ public class RepositorioUsuarioJPA {
             throw e;
         } finally {
             em.close();
+        }
+    }
+
+    // Confere se o login do usuário está livre. Se não estiver, LANÇA a exceção.
+    // Em vez de devolver true/false (e depender de quem chama lembrar de verificar),
+    // o método simplesmente não deixa o código continuar quando há problema.
+    private void garantirLoginDisponivel(EntityManager em, Usuario usuario) {
+        Long quantidade;
+
+        if (usuario.getId() == null) {
+            // Usuário novo (ainda sem id): conta quantos usuários já usam este login
+            quantidade = em.createQuery(
+                    "SELECT COUNT(u) FROM Usuario u WHERE u.login = :login", Long.class)
+                    .setParameter("login", usuario.getLogin())
+                    .getSingleResult();
+        } else {
+            // Usuário em edição: conta os OUTROS usuários (id diferente) com este login,
+            // para ele não ser acusado de repetir o próprio login
+            quantidade = em.createQuery(
+                    "SELECT COUNT(u) FROM Usuario u WHERE u.login = :login AND u.id <> :id", Long.class)
+                    .setParameter("login", usuario.getLogin())
+                    .setParameter("id", usuario.getId())
+                    .getSingleResult();
+        }
+
+        // Se achou pelo menos um, o login já está em uso
+        if (quantidade > 0) {
+            throw new LoginDuplicadoException(usuario.getLogin());
         }
     }
 }
