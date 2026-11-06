@@ -1,8 +1,14 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
-package br.com.ifba.usuario.view;
+   
+    package br.com.ifba.usuario.view;
+
+   import br.com.ifba.usuario.entity.Usuario;
+   import br.com.ifba.usuario.repository.RepositorioUsuarioJPA;
+   import java.util.ArrayList;
+   import java.util.List;
+   import javax.swing.JOptionPane;
+   import javax.swing.table.DefaultTableModel;
+   
+
 
 /**
  *
@@ -12,13 +18,47 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaListagemUsuario.class.getName());
 
-    /**
-     * Creates new form TelaListagemUsuario
-     */
-    public TelaListagemUsuario() {
-        initComponents();
-    }
+           // Repositório que busca e grava no MySQL
+       private final RepositorioUsuarioJPA repositorio = new RepositorioUsuarioJPA();
 
+       // Usuários que estão aparecendo na tabela, na mesma ordem das linhas
+       // (a linha 0 da tabela é o item 0 da lista, e assim por diante)
+       private List<Usuario> usuariosExibidos = new ArrayList<>();
+
+       public TelaListagemUsuario() {
+           initComponents();
+           carregarTabela();
+       }
+
+       // Busca todos os usuários no banco e mostra na tabela
+       private void carregarTabela() {
+           try {
+               preencherTabela(repositorio.listarTodos());
+           } catch (RuntimeException e) {
+               JOptionPane.showMessageDialog(this,
+                       "Não foi possível carregar os usuários: " + e.getMessage(),
+                       "Erro", JOptionPane.ERROR_MESSAGE);
+           }
+       }
+
+       // Desenha na tabela a lista que receber (a senha não aparece)
+       private void preencherTabela(List<Usuario> lista) {
+           // Modelo novo, com as mesmas 5 colunas e sem deixar editar a célula digitando
+           DefaultTableModel modelo = new DefaultTableModel(
+                   new Object[]{"Nome", "CPF", "Login", "E-mail", "Telefone"}, 0) {
+               @Override
+               public boolean isCellEditable(int linha, int coluna) {
+                   return false;
+               }
+           };
+           for (Usuario u : lista) {
+               modelo.addRow(new Object[]{
+                   u.getNome(), u.getCpf(), u.getLogin(), u.getEmail(), u.getTelefone()
+               });
+           }
+           tblUsuarios.setModel(modelo);
+           usuariosExibidos = lista;
+       }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -119,15 +159,96 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
     }//GEN-LAST:event_btnBuscarActionPerformed
 
     private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoActionPerformed
-        // TODO add your handling code here:
+        // 1. Abre a tela de cadastro em modo "usuário novo", passando o mesmo repositório
+        //    (usamos o construtor que só recebe o repositório, sem usuário para editar)
+        TelaCadastroUsuario tela = new TelaCadastroUsuario(repositorio);
+
+        // 2. Avisa que ela foi aberta pela listagem: o botão Cancelar só fecha a janela,
+        //    sem abrir a tela de login
+        tela.setVoltarParaLogin(false);
+
+        // 3. Fechar pelo X deve fechar só esta janela, sem encerrar o programa inteiro
+        tela.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+
+        // 4. Quando a janela de cadastro fechar, recarrega a tabela do banco,
+        //    para o usuário novo aparecer na listagem
+        tela.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                carregarTabela();
+            }
+        });
+
+        tela.setVisible(true);
     }//GEN-LAST:event_btnNovoActionPerformed
 
     private void btnRemoverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoverActionPerformed
-        // TODO add your handling code here:
+                // 1. Descobre qual linha da tabela o usuário clicou (-1 significa que nenhuma está selecionada)
+        int linha = tblUsuarios.getSelectedRow();
+        if (linha == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Selecione um usuário na tabela para remover.",
+                    "Atenção", JOptionPane.WARNING_MESSAGE);
+            return; // para o método aqui, não continua
+        }
+
+        // 2. A lista "usuariosExibidos" está na mesma ordem das linhas da tabela,
+        //    então a linha 0 da tabela é o item 0 da lista, e assim por diante.
+        //    Pegamos o objeto Usuario inteiro, porque precisamos do id dele.
+        Usuario usuario = usuariosExibidos.get(linha);
+
+        // 3. Pergunta antes de apagar, para não excluir sem querer
+        int opcao = JOptionPane.showConfirmDialog(this,
+                "Deseja excluir o usuário " + usuario.getNome() + "?",
+                "Confirmar exclusão", JOptionPane.YES_NO_OPTION);
+
+        // 4. Só exclui se a resposta foi "Sim"
+        if (opcao == JOptionPane.YES_OPTION) {
+            try {
+                // remove do MySQL (o repositório faz o find + remove dentro de uma transação)
+                repositorio.excluir(usuario.getId());
+                // busca a lista de novo no banco, para a linha sumir da tabela
+                carregarTabela();
+            } catch (RuntimeException e) {
+                // se o banco der erro, avisa em vez de a tela quebrar em silêncio
+                JOptionPane.showMessageDialog(this,
+                        "Não foi possível excluir o usuário: " + e.getMessage(),
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }//GEN-LAST:event_btnRemoverActionPerformed
 
     private void btnEditarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditarActionPerformed
-        // TODO add your handling code here:
+                // 1. Descobre qual linha da tabela foi selecionada (-1 significa que nenhuma foi)
+        int linha = tblUsuarios.getSelectedRow();
+        if (linha == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Selecione um usuário na tabela para editar.",
+                    "Atenção", JOptionPane.WARNING_MESSAGE);
+            return; // para o método aqui
+        }
+
+        // 2. Pega o objeto Usuario dessa linha (a lista está na mesma ordem da tabela).
+        //    Ele já carrega o id, que é o que permite o merge atualizar a linha certa.
+        Usuario usuario = usuariosExibidos.get(linha);
+
+        // 3. Abre a tela de cadastro em modo edição, passando o repositório e o usuário escolhido
+        TelaCadastroUsuario tela = new TelaCadastroUsuario(repositorio, usuario);
+
+        // 4. A tela de cadastro, por padrão, encerra o programa inteiro ao fechar no X.
+        //    Aqui só fechar a janela de edição, sem derrubar a listagem.
+        tela.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+
+        // 5. Quando a janela de edição fechar, recarrega a tabela do banco,
+        //    para as alterações aparecerem na listagem.
+        tela.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                carregarTabela();
+            }
+        });
+
+        tela.setVisible(true);
     }//GEN-LAST:event_btnEditarActionPerformed
 
     /**
