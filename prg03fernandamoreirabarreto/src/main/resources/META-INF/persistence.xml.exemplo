@@ -20,7 +20,7 @@
             <property name="hibernate.format_sql" value="true"/>
             <property name="hibernate.show_sql" value="true"/>
             <!-- Cria as tabelas se não existirem; senão, atualiza -->
-            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <property name="hibernate.hbm2ddl.auto" value="validate"/>
         </properties>
     </persistence-unit>
 </persistence>
