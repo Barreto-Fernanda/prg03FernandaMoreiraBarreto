@@ -7,3 +7,4 @@ prg03fernandamoreirabarreto/src/main/resources/META-INF/persistence.xml
 
 # build do Maven
 target/
+prg03fernandamoreirabarreto/src/main/resources/banco.properties
