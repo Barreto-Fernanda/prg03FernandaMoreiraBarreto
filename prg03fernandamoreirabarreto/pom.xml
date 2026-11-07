@@ -49,5 +49,26 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.33</version>
         </dependency>
+
+        <!-- FLYWAY: a ferramenta que aplica os arquivos .sql (migrations) na ordem
+             e anota no banco quais já rodaram (tabela flyway_schema_history). -->
+        <dependency>
+            <!-- groupId: a "empresa/projeto" dono da biblioteca (Flyway) -->
+            <groupId>org.flywaydb</groupId>
+            <!-- artifactId: o nome da biblioteca; "core" é o motor principal do Flyway -->
+            <artifactId>flyway-core</artifactId>
+            <!-- version: a versão do slide do professor; as duas precisam ser iguais -->
+            <version>10.10.0</version>
+        </dependency>
+
+        <!-- FLYWAY PARA MYSQL: o "complemento" que ensina o Flyway a conversar com o MySQL.
+             Sem ele, o core não sabe falar o dialeto do seu banco e a aplicação dá erro. -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+            <!-- Mesma versão do flyway-core, para os dois funcionarem juntos -->
+            <version>10.10.0</version>
+        </dependency>
     </dependencies>
 </project>
+       

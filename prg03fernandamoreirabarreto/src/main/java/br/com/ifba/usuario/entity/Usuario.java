@@ -46,6 +46,9 @@ public class Usuario implements Autenticavel {
 
     @Column(nullable = false)
     private String senha;
+    
+    @Column(length = 30)
+    private String cargo;
 
     // Construtor vazio: a JPA EXIGE um (ela cria o objeto vazio e depois preenche)
     public Usuario() {

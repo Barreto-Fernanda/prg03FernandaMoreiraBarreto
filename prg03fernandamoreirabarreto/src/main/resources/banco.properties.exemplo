@@ -1,0 +1,3 @@
+db.url=jdbc:mysql://localhost:3306/prg03_projeto?createDatabaseIfNotExist=true&serverTimezone=UTC
+db.user=
+db.password=
