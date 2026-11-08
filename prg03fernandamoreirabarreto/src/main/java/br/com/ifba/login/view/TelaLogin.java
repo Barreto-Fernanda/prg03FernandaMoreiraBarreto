@@ -1,7 +1,10 @@
 package br.com.ifba.login.view;
 import br.com.ifba.usuario.entity.Usuario;
 import javax.swing.JOptionPane;
-import br.com.ifba.usuario.repository.RepositorioUsuarioJPA;
+// Contrato do DAO, usado no tipo do campo
+import br.com.ifba.usuario.dao.UsuarioIDao;
+// Implementação real, que fala com o MySQL
+import br.com.ifba.usuario.dao.UsuarioDao;
 
 
 public class TelaLogin extends javax.swing.JFrame {
@@ -9,9 +12,10 @@ public class TelaLogin extends javax.swing.JFrame {
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaLogin.class.getName());
 
     
-   // Repositório que grava no MySQL, compartilhado com a tela de cadastro
-   private final RepositorioUsuarioJPA repositorio = new RepositorioUsuarioJPA();
-    
+      // DAO que grava no MySQL, compartilhado com a tela de cadastro
+   private final UsuarioIDao dao = new UsuarioDao();
+   
+   
     public TelaLogin() {
         initComponents();
     }
@@ -145,8 +149,8 @@ public class TelaLogin extends javax.swing.JFrame {
     }//GEN-LAST:event_txtSenhaActionPerformed
 
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
-        // Entrega o repositório à tela de cadastro, para os usuários cadastrados ficarem guardados nele
-        new br.com.ifba.usuario.view.TelaCadastroUsuario(repositorio).setVisible(true);
+                // Entrega o DAO à tela de cadastro
+        new br.com.ifba.usuario.view.TelaCadastroUsuario(dao).setVisible(true);
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
     /**
