@@ -2,11 +2,14 @@
     package br.com.ifba.usuario.view;
 
    import br.com.ifba.usuario.entity.Usuario;
-   import br.com.ifba.usuario.repository.RepositorioUsuarioJPA;
    import java.util.ArrayList;
    import java.util.List;
    import javax.swing.JOptionPane;
    import javax.swing.table.DefaultTableModel;
+      // Contrato do DAO, usado no tipo do campo
+   import br.com.ifba.usuario.dao.UsuarioIDao;
+   // Implementação real, que fala com o MySQL
+   import br.com.ifba.usuario.dao.UsuarioDao;
    
 
 
@@ -18,8 +21,8 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaListagemUsuario.class.getName());
 
-           // Repositório que busca e grava no MySQL
-       private final RepositorioUsuarioJPA repositorio = new RepositorioUsuarioJPA();
+                  // DAO que busca e grava no MySQL
+       private final UsuarioIDao dao = new UsuarioDao();
 
        // Usuários que estão aparecendo na tabela, na mesma ordem das linhas
        // (a linha 0 da tabela é o item 0 da lista, e assim por diante)
@@ -33,7 +36,7 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
        // Busca todos os usuários no banco e mostra na tabela
        private void carregarTabela() {
            try {
-               preencherTabela(repositorio.listarTodos());
+             preencherTabela(dao.findAll());
            } catch (RuntimeException e) {
                JOptionPane.showMessageDialog(this,
                        "Não foi possível carregar os usuários: " + e.getMessage(),
@@ -162,7 +165,7 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
         try {
             // 2. Pede ao repositório os usuários cujo nome contém esse texto
             //    (a filtragem acontece no banco, com JPQL e WHERE)
-            List<Usuario> encontrados = repositorio.buscarPorNome(texto);
+            List<Usuario> encontrados = dao.findByNome(texto);
 
             // 3. Mostra só os encontrados na tabela.
             //    O preencherTabela também atualiza a lista "usuariosExibidos",
@@ -186,7 +189,7 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
     private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoActionPerformed
         // 1. Abre a tela de cadastro em modo "usuário novo", passando o mesmo repositório
         //    (usamos o construtor que só recebe o repositório, sem usuário para editar)
-        TelaCadastroUsuario tela = new TelaCadastroUsuario(repositorio);
+        TelaCadastroUsuario tela = new TelaCadastroUsuario(dao);
 
         // 2. Avisa que ela foi aberta pela listagem: o botão Cancelar só fecha a janela,
         //    sem abrir a tela de login
@@ -230,8 +233,8 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
         // 4. Só exclui se a resposta foi "Sim"
         if (opcao == JOptionPane.YES_OPTION) {
             try {
-                // remove do MySQL (o repositório faz o find + remove dentro de uma transação)
-                repositorio.excluir(usuario.getId());
+               // remove do MySQL (o DAO cuida da transação, do rollback e do close)
+                dao.delete(usuario);
                 // busca a lista de novo no banco, para a linha sumir da tabela
                 carregarTabela();
             } catch (RuntimeException e) {
@@ -258,7 +261,7 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
         Usuario usuario = usuariosExibidos.get(linha);
 
         // 3. Abre a tela de cadastro em modo edição, passando o repositório e o usuário escolhido
-        TelaCadastroUsuario tela = new TelaCadastroUsuario(repositorio, usuario);
+        TelaCadastroUsuario tela = new TelaCadastroUsuario(dao, usuario);
 
         // 4. A tela de cadastro, por padrão, encerra o programa inteiro ao fechar no X.
         //    Aqui só fechar a janela de edição, sem derrubar a listagem.

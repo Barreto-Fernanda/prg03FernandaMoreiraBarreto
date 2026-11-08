@@ -3,25 +3,29 @@ import javax.swing.JOptionPane;
 import br.com.ifba.usuario.validar.ValidadorUsuario;
 import br.com.ifba.usuario.entity.Usuario;
 import br.com.ifba.login.view.TelaLogin;
-import br.com.ifba.usuario.repository.RepositorioUsuarioJPA;
+// Contrato do DAO: a tela depende da interface, não da classe que fala com o banco
+import br.com.ifba.usuario.dao.UsuarioIDao;
+// Implementação real, que fala com o MySQL
+import br.com.ifba.usuario.dao.UsuarioDao;
+
 import br.com.ifba.usuario.exception.LoginDuplicadoException;
 
 public class TelaCadastroUsuario extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaCadastroUsuario.class.getName());
 
-       // Repositório que grava no MySQL
-       private final RepositorioUsuarioJPA repositorio;
+       // DAO que grava no MySQL: a tela só pede dao.save(...), sem conhecer EntityManager
+       private final UsuarioIDao dao;
 
-       // Usado pela TelaLogin: recebe o repositório compartilhado
-       public TelaCadastroUsuario(RepositorioUsuarioJPA repositorio) {
-           this.repositorio = repositorio;
+       // Usado pela TelaLogin: recebe o DAO compartilhado
+       public TelaCadastroUsuario(UsuarioIDao dao) {
+           this.dao = dao;
            initComponents();
        }
 
-       // Usado pelo main desta tela: cria o seu próprio repositório
+       // Usado pelo main desta tela: cria o seu próprio DAO
        public TelaCadastroUsuario() {
-           this(new RepositorioUsuarioJPA());
+           this(new UsuarioDao());
        }
        
            // Guarda o usuário que está sendo editado.
@@ -40,8 +44,8 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
     // Construtor usado pelo botão Editar da tela de listagem:
     // recebe o repositório e o usuário escolhido, e abre a tela já preenchida
-    public TelaCadastroUsuario(RepositorioUsuarioJPA repositorio, Usuario usuarioEmEdicao) {
-        this.repositorio = repositorio;
+        public TelaCadastroUsuario(UsuarioIDao dao, Usuario usuarioEmEdicao) {
+        this.dao = dao;
         this.usuarioEmEdicao = usuarioEmEdicao;
         this.voltarParaLogin = false; // aberta pela listagem: Cancelar só fecha a janela
         initComponents();   // desenha a tela
@@ -284,9 +288,9 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
         try {
             if (edicao) {
-                repositorio.atualizar(usuario); // atualiza a linha no banco (merge)
+                dao.update(usuario); // atualiza a linha no banco
             } else {
-                repositorio.cadastrar(usuario); // insere uma linha nova no banco (persist)
+                dao.save(usuario); // insere uma linha nova no banco
             }
 
             // Mensagem de sucesso, com o verbo certo para cada caso

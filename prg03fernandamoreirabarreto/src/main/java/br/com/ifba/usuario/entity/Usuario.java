@@ -4,11 +4,10 @@ import br.com.ifba.usuario.interfaces.Autenticavel;
 // Anotações da JPA (pacote jakarta, e não javax)
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.Objects;
+// Superclasse que passa a guardar o id (com @Id e @GeneratedValue) de todas as entidades
+import br.com.ifba.infrastructure.entity.PersistenceEntity;
 
 // Classe de domínio: representa um usuário do sistema.
 // Atributos privados (encapsulados): acesso só via getters/setters.
@@ -16,13 +15,13 @@ import java.util.Objects;
 // @Table: nome da tabela (sem isso seria "Usuario", o nome da classe).
 @Entity
 @Table(name = "usuario")
-public class Usuario implements Autenticavel {
 
-    // Chave primária. O banco gera o valor sozinho (auto incremento no MySQL).
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+// extends PersistenceEntity: a Usuario herda o id (com @Id e @GeneratedValue) e os métodos
+// getId/setId da superclasse, em vez de ter um id próprio
+public class Usuario extends PersistenceEntity implements Autenticavel {
 
+    // O atributo id (com @Id e @GeneratedValue) não fica mais aqui: vem da PersistenceEntity
+    
     // nullable = false: a coluna não aceita valor vazio (NULL)
     @Column(nullable = false, length = 120)
     private String nome;
@@ -61,8 +60,6 @@ public class Usuario implements Autenticavel {
         this.senha = senha;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
     public String getCpf() { return cpf; }
