@@ -3,10 +3,12 @@ import javax.swing.JOptionPane;
 import br.com.ifba.usuario.validar.ValidadorUsuario;
 import br.com.ifba.usuario.entity.Usuario;
 import br.com.ifba.login.view.TelaLogin;
-// Contrato do DAO: a tela depende da interface, não da classe que fala com o banco
-import br.com.ifba.usuario.dao.UsuarioIDao;
-// Implementação real, que fala com o MySQL
-import br.com.ifba.usuario.dao.UsuarioDao;
+// Contrato do Controller: a tela só conhece a interface, nunca o DAO nem o Service
+import br.com.ifba.usuario.controller.UsuarioIController;
+// Tela de login, reaberta pelo botão Cancelar
+import br.com.ifba.login.view.TelaLogin;
+// Exceção de regra de negócio lançada pelo Service (CPF inválido, senha curta, palavra proibida)
+import br.com.ifba.infrastructure.exception.NegocioException;
 
 import br.com.ifba.usuario.exception.LoginDuplicadoException;
 
@@ -14,18 +16,13 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaCadastroUsuario.class.getName());
 
-       // DAO que grava no MySQL: a tela só pede dao.save(...), sem conhecer EntityManager
-       private final UsuarioIDao dao;
+              // Controller que recebe os pedidos da tela: ela só chama controller.save(...)
+       private final UsuarioIController controller;
 
-       // Usado pela TelaLogin: recebe o DAO compartilhado
-       public TelaCadastroUsuario(UsuarioIDao dao) {
-           this.dao = dao;
+       // Injeção de dependência: a tela RECEBE o Controller, não cria nada
+       public TelaCadastroUsuario(UsuarioIController controller) {
+           this.controller = controller;
            initComponents();
-       }
-
-       // Usado pelo main desta tela: cria o seu próprio DAO
-       public TelaCadastroUsuario() {
-           this(new UsuarioDao());
        }
        
            // Guarda o usuário que está sendo editado.
@@ -44,8 +41,8 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
     // Construtor usado pelo botão Editar da tela de listagem:
     // recebe o repositório e o usuário escolhido, e abre a tela já preenchida
-        public TelaCadastroUsuario(UsuarioIDao dao, Usuario usuarioEmEdicao) {
-        this.dao = dao;
+        public TelaCadastroUsuario(UsuarioIController controller, Usuario usuarioEmEdicao) {
+        this.controller = controller;
         this.usuarioEmEdicao = usuarioEmEdicao;
         this.voltarParaLogin = false; // aberta pela listagem: Cancelar só fecha a janela
         initComponents();   // desenha a tela
@@ -230,8 +227,7 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
-        // TESTE TEMPORÁRIO: escreve no Output para confirmar que o clique chegou até aqui.
-        System.out.println("Clicou em Cadastrar");
+
     String nome = txtNomeCompleto.getText();
     String cpf = txtCpf.getText();
     String dataNascimento = txtDatadeNascimento.getText();
@@ -241,29 +237,17 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
     String senha = new String(txtSenha.getPassword());
     String confirmarSenha = new String(txtConfirmarSenha.getPassword());
 
+        // Na tela ficam só as validações de CONVENIÊNCIA (avisam mais cedo).
+    // As regras de negócio (CPF, tamanho da senha, palavra proibida, login repetido)
+    // são decididas pelo Service, que vale para qualquer tela
     if (!ValidadorUsuario.camposPreenchidos(nome, cpf, dataNascimento, telefone, email, login, senha, confirmarSenha)) {
 
         JOptionPane.showMessageDialog(this, "Preencha todos os campos.",
                 "Erro", JOptionPane.ERROR_MESSAGE);
 
-    } else if (!ValidadorUsuario.cpfValido(cpf)) {
-
-        JOptionPane.showMessageDialog(this, "CPF inválido. Use apenas 11 números.",
-                "Erro", JOptionPane.ERROR_MESSAGE);
-
-    } else if (!ValidadorUsuario.senhaForte(senha)) {
-
-        JOptionPane.showMessageDialog(this, "Senha muito curta. Use ao menos 6 caracteres.",
-                "Erro", JOptionPane.ERROR_MESSAGE);
-
     } else if (!ValidadorUsuario.senhasCoincidem(senha, confirmarSenha)) {
 
         JOptionPane.showMessageDialog(this, "As senhas não coincidem.",
-                "Erro", JOptionPane.ERROR_MESSAGE);
-
-    } else if (ValidadorUsuario.contemPalavraProibida(login)) {
-
-        JOptionPane.showMessageDialog(this, "Login contém palavra não permitida.",
                 "Erro", JOptionPane.ERROR_MESSAGE);
 
         } else {
@@ -288,9 +272,9 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
         try {
             if (edicao) {
-                dao.update(usuario); // atualiza a linha no banco
+                               controller.update(usuario); // pede ao Controller para atualizar
             } else {
-                dao.save(usuario); // insere uma linha nova no banco
+                controller.save(usuario); // pede ao Controller para gravar um novo
             }
 
             // Mensagem de sucesso, com o verbo certo para cada caso
@@ -309,10 +293,15 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
                     "Login já cadastrado", JOptionPane.WARNING_MESSAGE);
             txtLogin.requestFocus(); // leva o cursor para o campo do login
             txtLogin.selectAll();    // deixa o texto selecionado, pronto para digitar outro
+                } catch (NegocioException e) {
+            // Regra de negócio violada (CPF inválido, senha curta, palavra proibida).
+            // Vem depois da LoginDuplicadoException, que é filha da NegocioException:
+            // o Java testa os catch de cima para baixo, então o mais específico vai primeiro
+            JOptionPane.showMessageDialog(this, e.getMessage(),
+                    "Dados inválidos", JOptionPane.WARNING_MESSAGE);
         } catch (RuntimeException e) {
-            // Qualquer OUTRO erro inesperado (banco fora do ar, CPF repetido, etc.).
-            // Este catch precisa vir DEPOIS do específico: o Java testa os catch de cima
-            // para baixo, e RuntimeException aceitaria também a LoginDuplicadoException.
+            // Qualquer OUTRO erro inesperado (banco fora do ar, CPF repetido no banco, etc.).
+            // Vai por último, porque RuntimeException aceita todas as anteriores
             JOptionPane.showMessageDialog(this,
                     "Não foi possível salvar o usuário: " + e.getMessage(),
                     "Erro", JOptionPane.ERROR_MESSAGE);
@@ -337,35 +326,13 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
         // Só volta para a tela de login se a tela tiver sido aberta pelo login
         if (voltarParaLogin) {
-            new br.com.ifba.login.view.TelaLogin().setVisible(true);
+            // Reabre o login entregando o mesmo Controller
+            new TelaLogin(controller).setVisible(true);
         }
 
     }//GEN-LAST:event_btnCancelarActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new TelaCadastroUsuario().setVisible(true));
-    }
+   
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel ConfirmarSenha;

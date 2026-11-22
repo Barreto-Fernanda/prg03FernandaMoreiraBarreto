@@ -1,10 +1,8 @@
 package br.com.ifba.login.view;
 import br.com.ifba.usuario.entity.Usuario;
 import javax.swing.JOptionPane;
-// Contrato do DAO, usado no tipo do campo
-import br.com.ifba.usuario.dao.UsuarioIDao;
-// Implementação real, que fala com o MySQL
-import br.com.ifba.usuario.dao.UsuarioDao;
+// Contrato do Controller: a tela só conhece a interface, nunca o DAO nem o Service
+import br.com.ifba.usuario.controller.UsuarioIController;
 
 
 public class TelaLogin extends javax.swing.JFrame {
@@ -12,11 +10,12 @@ public class TelaLogin extends javax.swing.JFrame {
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaLogin.class.getName());
 
     
-      // DAO que grava no MySQL, compartilhado com a tela de cadastro
-   private final UsuarioIDao dao = new UsuarioDao();
-   
-   
-    public TelaLogin() {
+         // Controller recebido pelo construtor (a tela não cria nada, só recebe)
+   private final UsuarioIController controller;
+
+    // Injeção de dependência: quem monta a tela (o main) entrega o Controller
+    public TelaLogin(UsuarioIController controller) {
+        this.controller = controller;
         initComponents();
     }
 
@@ -120,24 +119,31 @@ public class TelaLogin extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEntrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntrarActionPerformed
-    String loginDigitado = txtLogin.getText();
-    String senhaDigitada = new String(txtSenha.getPassword());
+     String loginDigitado = txtLogin.getText();
+        String senhaDigitada = new String(txtSenha.getPassword());
 
-    // Usuario "cadastrado" de teste, pra comparar (ainda não há persistência real)
-    Usuario usuarioCadastrado = new Usuario();
-    usuarioCadastrado.setLogin("barreto_fernanda");
-    usuarioCadastrado.setSenha("Fernanda123");
+        // Usuario "cadastrado" de teste, pra comparar (ainda não há persistência real)
+        Usuario usuarioCadastrado = new Usuario();
+        usuarioCadastrado.setLogin("barreto_fernanda");
+        usuarioCadastrado.setSenha("Fernanda123");
 
-    // chama o método da interface, através do objeto
-    boolean acessoLiberado = usuarioCadastrado.autenticar(loginDigitado, senhaDigitada);
+        // chama o método da interface, através do objeto
+        boolean acessoLiberado = usuarioCadastrado.autenticar(loginDigitado, senhaDigitada);
 
-    if (acessoLiberado) {
-        JOptionPane.showMessageDialog(this, "Acesso liberado!",
-                "Login", JOptionPane.INFORMATION_MESSAGE);
-    } else {
-        JOptionPane.showMessageDialog(this, "Acesso negado. Login ou senha incorretos.",
-                "Login", JOptionPane.ERROR_MESSAGE);
-    }
+        if (acessoLiberado) {
+            JOptionPane.showMessageDialog(this, "Acesso liberado!",
+                    "Login", JOptionPane.INFORMATION_MESSAGE);
+
+            // Abre a listagem de usuários, entregando o mesmo Controller (a tela não cria nada)
+            new br.com.ifba.usuario.view.TelaListagemUsuario(controller).setVisible(true);
+
+            // Fecha a tela de login, que já cumpriu o papel dela
+            this.dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, "Acesso negado. Login ou senha incorretos.",
+                    "Login", JOptionPane.ERROR_MESSAGE);
+        }
+    
     }//GEN-LAST:event_btnEntrarActionPerformed
 
     private void txtLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtLoginActionPerformed
@@ -149,34 +155,12 @@ public class TelaLogin extends javax.swing.JFrame {
     }//GEN-LAST:event_txtSenhaActionPerformed
 
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
-                // Entrega o DAO à tela de cadastro
-        new br.com.ifba.usuario.view.TelaCadastroUsuario(dao).setVisible(true);
+        // Repassa o Controller à tela de cadastro
+        new br.com.ifba.usuario.view.TelaCadastroUsuario(controller).setVisible(true);
+        
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
-    /**
-     * @param args the comsmand line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new TelaLogin().setVisible(true));
-    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCadastrar;

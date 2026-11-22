@@ -7,6 +7,7 @@ import br.com.ifba.usuario.entity.Usuario;
 // Tipo da lista que o findByNome devolve
 import java.util.List;
 
+
 // Contrato do DAO de Usuario: o CRUD comum vem do GenericIDao<Usuario>,
 // e aqui entra só o que é próprio do domínio Usuario
 public interface UsuarioIDao extends GenericIDao<Usuario> {

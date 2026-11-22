@@ -6,10 +6,8 @@
    import java.util.List;
    import javax.swing.JOptionPane;
    import javax.swing.table.DefaultTableModel;
-      // Contrato do DAO, usado no tipo do campo
-   import br.com.ifba.usuario.dao.UsuarioIDao;
-   // Implementação real, que fala com o MySQL
-   import br.com.ifba.usuario.dao.UsuarioDao;
+      // Contrato do Controller: a tela só conhece a interface, nunca o DAO nem o Service
+   import br.com.ifba.usuario.controller.UsuarioIController;
    
 
 
@@ -21,14 +19,16 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaListagemUsuario.class.getName());
 
-                  // DAO que busca e grava no MySQL
-       private final UsuarioIDao dao = new UsuarioDao();
+              // Controller recebido pelo construtor (a tela não cria nada, só recebe)
+       private final UsuarioIController controller;
 
        // Usuários que estão aparecendo na tabela, na mesma ordem das linhas
        // (a linha 0 da tabela é o item 0 da lista, e assim por diante)
        private List<Usuario> usuariosExibidos = new ArrayList<>();
 
-       public TelaListagemUsuario() {
+              // Injeção de dependência: quem monta a tela entrega o Controller
+       public TelaListagemUsuario(UsuarioIController controller) {
+           this.controller = controller;
            initComponents();
            carregarTabela();
        }
@@ -36,7 +36,7 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
        // Busca todos os usuários no banco e mostra na tabela
        private void carregarTabela() {
            try {
-             preencherTabela(dao.findAll());
+            preencherTabela(controller.findAll());
            } catch (RuntimeException e) {
                JOptionPane.showMessageDialog(this,
                        "Não foi possível carregar os usuários: " + e.getMessage(),
@@ -163,9 +163,10 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
         String texto = txtBusca.getText();
 
         try {
-            // 2. Pede ao repositório os usuários cujo nome contém esse texto
+            
+                        // 2. Pede ao Controller os usuários cujo nome contém esse texto
             //    (a filtragem acontece no banco, com JPQL e WHERE)
-            List<Usuario> encontrados = dao.findByNome(texto);
+            List<Usuario> encontrados = controller.findByNome(texto);
 
             // 3. Mostra só os encontrados na tabela.
             //    O preencherTabela também atualiza a lista "usuariosExibidos",
@@ -187,9 +188,9 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
     }//GEN-LAST:event_btnBuscarActionPerformed
 
     private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoActionPerformed
-        // 1. Abre a tela de cadastro em modo "usuário novo", passando o mesmo repositório
-        //    (usamos o construtor que só recebe o repositório, sem usuário para editar)
-        TelaCadastroUsuario tela = new TelaCadastroUsuario(dao);
+               // 1. Abre a tela de cadastro em modo "usuário novo", passando o mesmo Controller
+        //    (usamos o construtor que só recebe o Controller, sem usuário para editar)
+        TelaCadastroUsuario tela = new TelaCadastroUsuario(controller);
 
         // 2. Avisa que ela foi aberta pela listagem: o botão Cancelar só fecha a janela,
         //    sem abrir a tela de login
@@ -233,8 +234,8 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
         // 4. Só exclui se a resposta foi "Sim"
         if (opcao == JOptionPane.YES_OPTION) {
             try {
-               // remove do MySQL (o DAO cuida da transação, do rollback e do close)
-                dao.delete(usuario);
+                               // pede ao Controller para remover (ele repassa até o banco)
+                controller.delete(usuario);
                 // busca a lista de novo no banco, para a linha sumir da tabela
                 carregarTabela();
             } catch (RuntimeException e) {
@@ -260,8 +261,8 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
         //    Ele já carrega o id, que é o que permite o merge atualizar a linha certa.
         Usuario usuario = usuariosExibidos.get(linha);
 
-        // 3. Abre a tela de cadastro em modo edição, passando o repositório e o usuário escolhido
-        TelaCadastroUsuario tela = new TelaCadastroUsuario(dao, usuario);
+                // 3. Abre a tela de cadastro em modo edição, passando o Controller e o usuário escolhido
+        TelaCadastroUsuario tela = new TelaCadastroUsuario(controller, usuario);
 
         // 4. A tela de cadastro, por padrão, encerra o programa inteiro ao fechar no X.
         //    Aqui só fechar a janela de edição, sem derrubar a listagem.
@@ -279,30 +280,7 @@ public class TelaListagemUsuario extends javax.swing.JFrame {
         tela.setVisible(true);
     }//GEN-LAST:event_btnEditarActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new TelaListagemUsuario().setVisible(true));
-    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBuscar;
