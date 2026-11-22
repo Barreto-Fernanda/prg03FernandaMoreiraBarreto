@@ -11,6 +11,7 @@ import jakarta.persistence.EntityManager;
 // Tipo do resultado das consultas
 import java.util.List;
 
+
 // DAO de Usuario: herda todo o CRUD do GenericDao e cumpre o contrato do UsuarioIDao.
 // O DAO não julga, só executa: as regras de negócio (como o login único)
 // ficam no UsuarioService. Aqui só entram as buscas próprias do domínio Usuario.

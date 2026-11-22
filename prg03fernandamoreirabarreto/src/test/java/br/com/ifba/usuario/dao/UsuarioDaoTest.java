@@ -2,12 +2,13 @@ package br.com.ifba.usuario.dao;
 
 // Exceção de domínio que o DAO lança quando uma operação de persistência falha
 import br.com.ifba.infrastructure.exception.PersistenciaException;
+
+// Exceção de domínio que o DAO lança quando uma operação de persistência falha
+import br.com.ifba.infrastructure.exception.PersistenciaException;
 // Classe que entrega o EntityManager; aqui só serve para testar se o MySQL está de pé
 import br.com.ifba.infrastructure.util.JPAUtil;
 // Entidade usada nos testes
 import br.com.ifba.usuario.entity.Usuario;
-// Exceção de domínio lançada quando o login já pertence a outro usuário
-import br.com.ifba.usuario.exception.LoginDuplicadoException;
 // Lista que guarda os usuários criados, para apagar no fim de cada teste
 import java.util.ArrayList;
 import java.util.List;
@@ -120,31 +121,6 @@ class UsuarioDaoTest {
                 () -> dao.save(segundo));
 
         assertEquals("Erro ao salvar", erro.getMessage());
-    }
-
-    // Login repetido: a regra do UsuarioDao barra antes de tentar gravar
-    @Test
-    void saveComLoginDuplicadoLancaLoginDuplicadoException() {
-        Usuario primeiro = gravar(novoUsuario());
-
-        Usuario segundo = novoUsuario();
-        segundo.setLogin(primeiro.getLogin()); // mesmo login, CPF diferente
-
-        LoginDuplicadoException erro = assertThrows(LoginDuplicadoException.class,
-                () -> dao.save(segundo));
-
-        assertEquals(primeiro.getLogin(), erro.getLogin());
-    }
-
-    // Na edição, usar o login de OUTRO usuário também é recusado
-    @Test
-    void updateComLoginDeOutroUsuarioLancaLoginDuplicadoException() {
-        Usuario primeiro = gravar(novoUsuario());
-        Usuario segundo = gravar(novoUsuario());
-
-        segundo.setLogin(primeiro.getLogin());
-
-        assertThrows(LoginDuplicadoException.class, () -> dao.update(segundo));
     }
 
     // Na edição, manter o PRÓPRIO login não pode acusar duplicidade (não lança nada)
