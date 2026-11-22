@@ -3,10 +3,10 @@ import javax.swing.JOptionPane;
 import br.com.ifba.usuario.validar.ValidadorUsuario;
 import br.com.ifba.usuario.entity.Usuario;
 import br.com.ifba.login.view.TelaLogin;
-// Contrato do DAO: a tela depende da interface, não da classe que fala com o banco
-import br.com.ifba.usuario.dao.UsuarioIDao;
-// Implementação real, que fala com o MySQL
-import br.com.ifba.usuario.dao.UsuarioDao;
+// Contrato do Controller: a tela só conhece a interface, nunca o DAO nem o Service
+import br.com.ifba.usuario.controller.UsuarioIController;
+// Tela de login, reaberta pelo botão Cancelar
+import br.com.ifba.login.view.TelaLogin;
 // Exceção de regra de negócio lançada pelo Service (CPF inválido, senha curta, palavra proibida)
 import br.com.ifba.infrastructure.exception.NegocioException;
 
@@ -16,18 +16,13 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaCadastroUsuario.class.getName());
 
-       // DAO que grava no MySQL: a tela só pede dao.save(...), sem conhecer EntityManager
-       private final UsuarioIDao dao;
+              // Controller que recebe os pedidos da tela: ela só chama controller.save(...)
+       private final UsuarioIController controller;
 
-       // Usado pela TelaLogin: recebe o DAO compartilhado
-       public TelaCadastroUsuario(UsuarioIDao dao) {
-           this.dao = dao;
+       // Injeção de dependência: a tela RECEBE o Controller, não cria nada
+       public TelaCadastroUsuario(UsuarioIController controller) {
+           this.controller = controller;
            initComponents();
-       }
-
-       // Usado pelo main desta tela: cria o seu próprio DAO
-       public TelaCadastroUsuario() {
-           this(new UsuarioDao());
        }
        
            // Guarda o usuário que está sendo editado.
@@ -46,8 +41,8 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
     // Construtor usado pelo botão Editar da tela de listagem:
     // recebe o repositório e o usuário escolhido, e abre a tela já preenchida
-        public TelaCadastroUsuario(UsuarioIDao dao, Usuario usuarioEmEdicao) {
-        this.dao = dao;
+        public TelaCadastroUsuario(UsuarioIController controller, Usuario usuarioEmEdicao) {
+        this.controller = controller;
         this.usuarioEmEdicao = usuarioEmEdicao;
         this.voltarParaLogin = false; // aberta pela listagem: Cancelar só fecha a janela
         initComponents();   // desenha a tela
@@ -278,9 +273,9 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
         try {
             if (edicao) {
-                dao.update(usuario); // atualiza a linha no banco
+                               controller.update(usuario); // pede ao Controller para atualizar
             } else {
-                dao.save(usuario); // insere uma linha nova no banco
+                controller.save(usuario); // pede ao Controller para gravar um novo
             }
 
             // Mensagem de sucesso, com o verbo certo para cada caso
@@ -332,7 +327,8 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
         // Só volta para a tela de login se a tela tiver sido aberta pelo login
         if (voltarParaLogin) {
-            new br.com.ifba.login.view.TelaLogin().setVisible(true);
+            // Reabre o login entregando o mesmo Controller
+            new TelaLogin(controller).setVisible(true);
         }
 
     }//GEN-LAST:event_btnCancelarActionPerformed
