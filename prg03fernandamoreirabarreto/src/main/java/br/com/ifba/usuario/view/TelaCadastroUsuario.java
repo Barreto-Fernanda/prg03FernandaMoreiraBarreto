@@ -227,8 +227,7 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
-        // TESTE TEMPORÁRIO: escreve no Output para confirmar que o clique chegou até aqui.
-        System.out.println("Clicou em Cadastrar");
+
     String nome = txtNomeCompleto.getText();
     String cpf = txtCpf.getText();
     String dataNascimento = txtDatadeNascimento.getText();
