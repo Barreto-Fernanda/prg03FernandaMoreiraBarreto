@@ -7,6 +7,8 @@ import br.com.ifba.login.view.TelaLogin;
 import br.com.ifba.usuario.dao.UsuarioIDao;
 // Implementação real, que fala com o MySQL
 import br.com.ifba.usuario.dao.UsuarioDao;
+// Exceção de regra de negócio lançada pelo Service (CPF inválido, senha curta, palavra proibida)
+import br.com.ifba.infrastructure.exception.NegocioException;
 
 import br.com.ifba.usuario.exception.LoginDuplicadoException;
 
@@ -241,29 +243,17 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
     String senha = new String(txtSenha.getPassword());
     String confirmarSenha = new String(txtConfirmarSenha.getPassword());
 
+        // Na tela ficam só as validações de CONVENIÊNCIA (avisam mais cedo).
+    // As regras de negócio (CPF, tamanho da senha, palavra proibida, login repetido)
+    // são decididas pelo Service, que vale para qualquer tela
     if (!ValidadorUsuario.camposPreenchidos(nome, cpf, dataNascimento, telefone, email, login, senha, confirmarSenha)) {
 
         JOptionPane.showMessageDialog(this, "Preencha todos os campos.",
                 "Erro", JOptionPane.ERROR_MESSAGE);
 
-    } else if (!ValidadorUsuario.cpfValido(cpf)) {
-
-        JOptionPane.showMessageDialog(this, "CPF inválido. Use apenas 11 números.",
-                "Erro", JOptionPane.ERROR_MESSAGE);
-
-    } else if (!ValidadorUsuario.senhaForte(senha)) {
-
-        JOptionPane.showMessageDialog(this, "Senha muito curta. Use ao menos 6 caracteres.",
-                "Erro", JOptionPane.ERROR_MESSAGE);
-
     } else if (!ValidadorUsuario.senhasCoincidem(senha, confirmarSenha)) {
 
         JOptionPane.showMessageDialog(this, "As senhas não coincidem.",
-                "Erro", JOptionPane.ERROR_MESSAGE);
-
-    } else if (ValidadorUsuario.contemPalavraProibida(login)) {
-
-        JOptionPane.showMessageDialog(this, "Login contém palavra não permitida.",
                 "Erro", JOptionPane.ERROR_MESSAGE);
 
         } else {
@@ -309,10 +299,15 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
                     "Login já cadastrado", JOptionPane.WARNING_MESSAGE);
             txtLogin.requestFocus(); // leva o cursor para o campo do login
             txtLogin.selectAll();    // deixa o texto selecionado, pronto para digitar outro
+                } catch (NegocioException e) {
+            // Regra de negócio violada (CPF inválido, senha curta, palavra proibida).
+            // Vem depois da LoginDuplicadoException, que é filha da NegocioException:
+            // o Java testa os catch de cima para baixo, então o mais específico vai primeiro
+            JOptionPane.showMessageDialog(this, e.getMessage(),
+                    "Dados inválidos", JOptionPane.WARNING_MESSAGE);
         } catch (RuntimeException e) {
-            // Qualquer OUTRO erro inesperado (banco fora do ar, CPF repetido, etc.).
-            // Este catch precisa vir DEPOIS do específico: o Java testa os catch de cima
-            // para baixo, e RuntimeException aceitaria também a LoginDuplicadoException.
+            // Qualquer OUTRO erro inesperado (banco fora do ar, CPF repetido no banco, etc.).
+            // Vai por último, porque RuntimeException aceita todas as anteriores
             JOptionPane.showMessageDialog(this,
                     "Não foi possível salvar o usuário: " + e.getMessage(),
                     "Erro", JOptionPane.ERROR_MESSAGE);
