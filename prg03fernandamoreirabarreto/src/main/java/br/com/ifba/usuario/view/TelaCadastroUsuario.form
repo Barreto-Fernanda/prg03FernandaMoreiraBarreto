@@ -57,16 +57,16 @@
                   </Group>
               </Group>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="txtNomeCompleto" max="32767" attributes="0"/>
+                  <Component id="lblNomeCompleto" max="32767" attributes="0"/>
                   <Component id="txtCpf" max="32767" attributes="0"/>
-                  <Component id="txtDatadeNascimento" max="32767" attributes="0"/>
+                  <Component id="lblDataNascimento" max="32767" attributes="0"/>
                   <Component id="txtTelefone" max="32767" attributes="0"/>
                   <Component id="txtEmail" max="32767" attributes="0"/>
                   <Component id="txtLogin" max="32767" attributes="0"/>
                   <Component id="txtSenha" alignment="0" max="32767" attributes="0"/>
                   <Component id="txtConfirmarSenha" alignment="0" max="32767" attributes="0"/>
                   <Component id="btnCancelar" min="-2" pref="104" max="-2" attributes="0"/>
-                  <Component id="jComboBox1" alignment="0" min="-2" pref="154" max="-2" attributes="0"/>
+                  <Component id="cmbGenero" alignment="0" min="-2" pref="154" max="-2" attributes="0"/>
               </Group>
               <EmptySpace pref="35" max="32767" attributes="0"/>
           </Group>
@@ -77,7 +77,7 @@
           <Group type="102" attributes="0">
               <EmptySpace min="-2" pref="48" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="txtNomeCompleto" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="lblNomeCompleto" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="Nomecompleto" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -88,11 +88,11 @@
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="Genero" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jComboBox1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="cmbGenero" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="txtDatadeNascimento" alignment="3" max="32767" attributes="0"/>
+                  <Component id="lblDataNascimento" alignment="3" max="32767" attributes="0"/>
                   <Component id="DatadeNascimento" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -203,13 +203,16 @@
         <Property name="text" type="java.lang.String" value="Confirmar Senha:"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="txtNomeCompleto">
+    <Component class="javax.swing.JTextField" name="lblNomeCompleto">
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="lblNomeCompletoActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="txtCpf">
     </Component>
-    <Component class="javax.swing.JTextField" name="txtDatadeNascimento">
+    <Component class="javax.swing.JTextField" name="lblDataNascimento">
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtDatadeNascimentoActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="lblDataNascimentoActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="txtTelefone">
@@ -244,7 +247,7 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCancelarActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JComboBox" name="jComboBox1">
+    <Component class="javax.swing.JComboBox" name="cmbGenero">
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
           <StringArray count="3">
@@ -255,7 +258,7 @@
         </Property>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jComboBox1ActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbGeneroActionPerformed"/>
       </Events>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
