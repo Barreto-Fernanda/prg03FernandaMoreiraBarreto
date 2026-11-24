@@ -335,7 +335,8 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
 
-        // Fecha e libera da memória a janela atual
+        // dispose() em vez de setVisible(false): só esconder a janela a deixaria viva na memória,
+// acumulando uma tela nova a cada vez que o usuário cancela e abre de novo
         this.dispose();
 
         // Só volta para a tela de login se a tela tiver sido aberta pelo login
