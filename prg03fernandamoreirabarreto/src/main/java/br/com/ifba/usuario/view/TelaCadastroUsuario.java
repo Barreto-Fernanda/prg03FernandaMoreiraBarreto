@@ -53,10 +53,10 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
     // Copia os dados do usuário para os campos da tela
     private void preencherCampos() {
-        txtNomeCompleto.setText(usuarioEmEdicao.getNome());
+        lblNomeCompleto.setText(usuarioEmEdicao.getNome());
         txtCpf.setText(usuarioEmEdicao.getCpf());
-        jComboBox1.setSelectedItem(usuarioEmEdicao.getGenero()); // escolhe o gênero na lista
-        txtDatadeNascimento.setText(usuarioEmEdicao.getDataNascimento());
+        cmbGenero.setSelectedItem(usuarioEmEdicao.getGenero()); // escolhe o gênero na lista
+        lblDataNascimento.setText(usuarioEmEdicao.getDataNascimento());
         txtTelefone.setText(usuarioEmEdicao.getTelefone());
         txtEmail.setText(usuarioEmEdicao.getEmail());
         txtLogin.setText(usuarioEmEdicao.getLogin());
@@ -85,9 +85,9 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
         Login = new javax.swing.JLabel();
         Senha = new javax.swing.JLabel();
         ConfirmarSenha = new javax.swing.JLabel();
-        txtNomeCompleto = new javax.swing.JTextField();
+        lblNomeCompleto = new javax.swing.JTextField();
         txtCpf = new javax.swing.JTextField();
-        txtDatadeNascimento = new javax.swing.JTextField();
+        lblDataNascimento = new javax.swing.JTextField();
         txtTelefone = new javax.swing.JTextField();
         txtEmail = new javax.swing.JTextField();
         txtLogin = new javax.swing.JTextField();
@@ -95,7 +95,7 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
         txtConfirmarSenha = new javax.swing.JPasswordField();
         btnCadastrar = new javax.swing.JButton();
         btnCancelar = new javax.swing.JButton();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        cmbGenero = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Tela de Cadastro");
@@ -129,7 +129,9 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
         ConfirmarSenha.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
         ConfirmarSenha.setText("Confirmar Senha:");
 
-        txtDatadeNascimento.addActionListener(this::txtDatadeNascimentoActionPerformed);
+        lblNomeCompleto.addActionListener(this::lblNomeCompletoActionPerformed);
+
+        lblDataNascimento.addActionListener(this::lblDataNascimentoActionPerformed);
 
         btnCadastrar.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
         btnCadastrar.setText("Cadastrar");
@@ -139,8 +141,8 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
         btnCancelar.setText("Cancelar");
         btnCancelar.addActionListener(this::btnCancelarActionPerformed);
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Feminino", "Masculino", "Outro" }));
-        jComboBox1.addActionListener(this::jComboBox1ActionPerformed);
+        cmbGenero.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Feminino", "Masculino", "Outro" }));
+        cmbGenero.addActionListener(this::cmbGeneroActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -165,16 +167,16 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
                         .addComponent(btnCadastrar, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtNomeCompleto)
+                    .addComponent(lblNomeCompleto)
                     .addComponent(txtCpf)
-                    .addComponent(txtDatadeNascimento)
+                    .addComponent(lblDataNascimento)
                     .addComponent(txtTelefone)
                     .addComponent(txtEmail)
                     .addComponent(txtLogin)
                     .addComponent(txtSenha)
                     .addComponent(txtConfirmarSenha)
                     .addComponent(btnCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmbGenero, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(35, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -182,7 +184,7 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(48, 48, 48)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtNomeCompleto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblNomeCompleto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(Nomecompleto))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -191,10 +193,10 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(Genero)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmbGenero, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtDatadeNascimento)
+                    .addComponent(lblDataNascimento)
                     .addComponent(DatadeNascimento))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -242,8 +244,8 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
         String senha = new String(txtSenha.getPassword());
         String confirmarSenha = new String(txtConfirmarSenha.getPassword());
 
-        if (!ValidadorUsuario.camposPreenchidos(txtNomeCompleto.getText(), txtCpf.getText(),
-                txtDatadeNascimento.getText(), txtTelefone.getText(), txtEmail.getText(),
+        if (!ValidadorUsuario.camposPreenchidos(lblNomeCompleto.getText(), txtCpf.getText(),
+                lblDataNascimento.getText(), txtTelefone.getText(), txtEmail.getText(),
                 txtLogin.getText(), senha, confirmarSenha)) {
             mostrarErro("Preencha todos os campos.");
             return false;
@@ -261,10 +263,10 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
     private Usuario montarUsuario() {
         Usuario usuario = estaEditando() ? usuarioEmEdicao : new Usuario();
 
-        usuario.setNome(txtNomeCompleto.getText());
+        usuario.setNome(lblNomeCompleto.getText());
         usuario.setCpf(txtCpf.getText());
-        usuario.setGenero(jComboBox1.getSelectedItem().toString());
-        usuario.setDataNascimento(txtDatadeNascimento.getText());
+        usuario.setGenero(cmbGenero.getSelectedItem().toString());
+        usuario.setDataNascimento(lblDataNascimento.getText());
         usuario.setTelefone(txtTelefone.getText());
         usuario.setEmail(txtEmail.getText());
         usuario.setLogin(txtLogin.getText());
@@ -323,13 +325,13 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
                 "Cadastro", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+    private void cmbGeneroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbGeneroActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox1ActionPerformed
+    }//GEN-LAST:event_cmbGeneroActionPerformed
 
-    private void txtDatadeNascimentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDatadeNascimentoActionPerformed
+    private void lblDataNascimentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lblDataNascimentoActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtDatadeNascimentoActionPerformed
+    }//GEN-LAST:event_lblDataNascimentoActionPerformed
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
 
@@ -343,6 +345,10 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
         }
 
     }//GEN-LAST:event_btnCancelarActionPerformed
+
+    private void lblNomeCompletoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lblNomeCompletoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_lblNomeCompletoActionPerformed
 
    
 
@@ -358,14 +364,14 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
     private javax.swing.JLabel Telefone;
     private javax.swing.JButton btnCadastrar;
     private javax.swing.JButton btnCancelar;
-    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JComboBox<String> cmbGenero;
+    private javax.swing.JTextField lblDataNascimento;
+    private javax.swing.JTextField lblNomeCompleto;
     private javax.swing.JPasswordField txtConfirmarSenha;
     private javax.swing.JTextField txtCpf;
-    private javax.swing.JTextField txtDatadeNascimento;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtLogin;
     private javax.swing.JTextField txtNome3;
-    private javax.swing.JTextField txtNomeCompleto;
     private javax.swing.JPasswordField txtSenha;
     private javax.swing.JTextField txtTelefone;
     // End of variables declaration//GEN-END:variables
