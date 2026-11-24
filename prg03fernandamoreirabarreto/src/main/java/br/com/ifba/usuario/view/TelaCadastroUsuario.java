@@ -228,87 +228,99 @@ public class TelaCadastroUsuario extends javax.swing.JFrame {
 
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
 
-    String nome = txtNomeCompleto.getText();
-    String cpf = txtCpf.getText();
-    String dataNascimento = txtDatadeNascimento.getText();
-    String telefone = txtTelefone.getText();
-    String email = txtEmail.getText();
-    String login = txtLogin.getText();
-    String senha = new String(txtSenha.getPassword());
-    String confirmarSenha = new String(txtConfirmarSenha.getPassword());
+            if (!camposValidos()) {
+            return; // a mensagem de erro já foi mostrada
+        }
+        Usuario usuario = montarUsuario();
+        salvarComFeedback(usuario);
+    }
 
-        // Na tela ficam só as validações de CONVENIÊNCIA (avisam mais cedo).
-    // As regras de negócio (CPF, tamanho da senha, palavra proibida, login repetido)
+    // Validações de CONVENIÊNCIA: avisam mais cedo, mas não garantem nada.
+    // As regras de negócio (CPF, senha mínima, palavra proibida, login repetido)
     // são decididas pelo Service, que vale para qualquer tela
-    if (!ValidadorUsuario.camposPreenchidos(nome, cpf, dataNascimento, telefone, email, login, senha, confirmarSenha)) {
+    private boolean camposValidos() {
+        String senha = new String(txtSenha.getPassword());
+        String confirmarSenha = new String(txtConfirmarSenha.getPassword());
 
-        JOptionPane.showMessageDialog(this, "Preencha todos os campos.",
-                "Erro", JOptionPane.ERROR_MESSAGE);
+        if (!ValidadorUsuario.camposPreenchidos(txtNomeCompleto.getText(), txtCpf.getText(),
+                txtDatadeNascimento.getText(), txtTelefone.getText(), txtEmail.getText(),
+                txtLogin.getText(), senha, confirmarSenha)) {
+            mostrarErro("Preencha todos os campos.");
+            return false;
+        }
+        if (!ValidadorUsuario.senhasCoincidem(senha, confirmarSenha)) {
+            mostrarErro("As senhas não coincidem.");
+            return false;
+        }
+        return true;
+    }
 
-    } else if (!ValidadorUsuario.senhasCoincidem(senha, confirmarSenha)) {
+    // Na edição reaproveita o objeto da listagem, porque ele já carrega o id do banco
+    // (é o id que faz o merge atualizar a linha certa em vez de criar outra).
+    // No cadastro novo cria um objeto vazio, sem id
+    private Usuario montarUsuario() {
+        Usuario usuario = estaEditando() ? usuarioEmEdicao : new Usuario();
 
-        JOptionPane.showMessageDialog(this, "As senhas não coincidem.",
-                "Erro", JOptionPane.ERROR_MESSAGE);
-
-        } else {
-                // Descobre se a tela está sendo usada para EDITAR (usuarioEmEdicao preenchido)
-        // ou para CADASTRAR um usuário novo (usuarioEmEdicao é null)
-        boolean edicao = (usuarioEmEdicao != null);
-
-        // Na edição, reaproveita o objeto que veio da listagem: ele já carrega o id do banco,
-        // e é esse id que faz o merge atualizar a linha certa em vez de criar outra.
-        // No cadastro novo, cria um objeto vazio (sem id; o banco gera o id sozinho).
-        Usuario usuario = edicao ? usuarioEmEdicao : new Usuario();
-
-        // Copia para o objeto o que está digitado na tela (vale para os dois casos)
-        usuario.setNome(nome);
-        usuario.setCpf(cpf);
+        usuario.setNome(txtNomeCompleto.getText());
+        usuario.setCpf(txtCpf.getText());
         usuario.setGenero(jComboBox1.getSelectedItem().toString());
-        usuario.setDataNascimento(dataNascimento);
-        usuario.setTelefone(telefone);
-        usuario.setEmail(email);
-        usuario.setLogin(login);
-        usuario.setSenha(senha);
+        usuario.setDataNascimento(txtDatadeNascimento.getText());
+        usuario.setTelefone(txtTelefone.getText());
+        usuario.setEmail(txtEmail.getText());
+        usuario.setLogin(txtLogin.getText());
+        usuario.setSenha(new String(txtSenha.getPassword()));
+        return usuario;
+    }
 
+    // Grava e avisa o resultado. Cada tipo de erro tem a sua mensagem
+    private void salvarComFeedback(Usuario usuario) {
+        boolean edicao = estaEditando();
         try {
-            if (edicao) {
-                               controller.update(usuario); // pede ao Controller para atualizar
-            } else {
-                controller.save(usuario); // pede ao Controller para gravar um novo
-            }
-
-            // Mensagem de sucesso, com o verbo certo para cada caso
-            JOptionPane.showMessageDialog(this,
-                    "Usuário " + usuario.getNome() + (edicao ? " atualizado" : " cadastrado") + " com sucesso!",
-                    "Cadastro", JOptionPane.INFORMATION_MESSAGE);
-
+            gravar(usuario);
+            mostrarSucesso(usuario, edicao);
             if (edicao) {
                 this.dispose(); // na edição, fecha esta tela e volta para a listagem
             }
-            } catch (LoginDuplicadoException e) {
-            // Erro ESPERADO do negócio: o login já existe. Capturamos a nossa exceção
-            // e mostramos a mensagem que ela mesma montou (e.getMessage()).
-            // A tela não fecha e não mostra "sucesso": o usuário vê o problema e pode corrigir.
+        } catch (LoginDuplicadoException e) {
+            // Vem antes da NegocioException porque é filha dela: o Java testa os catch de cima
+            // para baixo. A tela não fecha, para o usuário corrigir o login
             JOptionPane.showMessageDialog(this, e.getMessage(),
                     "Login já cadastrado", JOptionPane.WARNING_MESSAGE);
-            txtLogin.requestFocus(); // leva o cursor para o campo do login
-            txtLogin.selectAll();    // deixa o texto selecionado, pronto para digitar outro
-                } catch (NegocioException e) {
-            // Regra de negócio violada (CPF inválido, senha curta, palavra proibida).
-            // Vem depois da LoginDuplicadoException, que é filha da NegocioException:
-            // o Java testa os catch de cima para baixo, então o mais específico vai primeiro
+            txtLogin.requestFocus();
+            txtLogin.selectAll();
+        } catch (NegocioException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(),
                     "Dados inválidos", JOptionPane.WARNING_MESSAGE);
         } catch (RuntimeException e) {
-            // Qualquer OUTRO erro inesperado (banco fora do ar, CPF repetido no banco, etc.).
-            // Vai por último, porque RuntimeException aceita todas as anteriores
+            // Vai por último porque aceita todas as anteriores (banco fora do ar, CPF repetido...)
             JOptionPane.showMessageDialog(this,
                     "Não foi possível salvar o usuário: " + e.getMessage(),
                     "Erro", JOptionPane.ERROR_MESSAGE);
         }
+        }
 
-        
+    // Edição usa update; cadastro novo usa save
+    private void gravar(Usuario usuario) {
+        if (estaEditando()) {
+            controller.update(usuario);
+        } else {
+            controller.save(usuario);
+        }
     }
+
+    // usuarioEmEdicao fica null quando a tela é usada para cadastrar
+    private boolean estaEditando() {
+        return usuarioEmEdicao != null;
+    }
+
+    private void mostrarErro(String mensagem) {
+        JOptionPane.showMessageDialog(this, mensagem, "Erro", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void mostrarSucesso(Usuario usuario, boolean edicao) {
+        JOptionPane.showMessageDialog(this,
+                "Usuário " + usuario.getNome() + (edicao ? " atualizado" : " cadastrado") + " com sucesso!",
+                "Cadastro", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
