@@ -3,8 +3,12 @@ import br.com.ifba.usuario.entity.Usuario;
 import javax.swing.JOptionPane;
 // Contrato do Controller: a tela só conhece a interface, nunca o DAO nem o Service
 import br.com.ifba.usuario.controller.UsuarioIController;
+// Anotação do Spring que registra esta tela no contêiner (camada VIEW),
+// para o getBean(TelaLogin.class) da classe de entrada conseguir entregá-la pronta
+import org.springframework.stereotype.Component;
 
 
+@Component
 public class TelaLogin extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaLogin.class.getName());

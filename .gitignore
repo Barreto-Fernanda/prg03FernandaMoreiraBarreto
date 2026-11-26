@@ -2,9 +2,9 @@
 desktop.ini
 /prg03fernandamoreirabarreto/nbproject/
 
-# credenciais do banco (só o .exemplo vai pro repositório)
-prg03fernandamoreirabarreto/src/main/resources/META-INF/persistence.xml
 
 # build do Maven
 target/
 prg03fernandamoreirabarreto/src/main/resources/banco.properties
+
+**/application.properties

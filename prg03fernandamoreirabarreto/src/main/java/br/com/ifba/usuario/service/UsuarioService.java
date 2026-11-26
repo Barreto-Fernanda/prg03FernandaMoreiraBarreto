@@ -12,9 +12,12 @@ import br.com.ifba.usuario.exception.LoginDuplicadoException;
 import br.com.ifba.usuario.validar.ValidadorUsuario;
 // Tipo da lista que findAll e findByNome devolvem
 import java.util.List;
+// Anotação do Spring que registra esta classe no contêiner como a camada de REGRAS DE NEGÓCIO
+import org.springframework.stereotype.Service;
 
 // Service de Usuario: é o "juiz do domínio". Decide se a operação pode acontecer
 // e só então entrega o usuário ao DAO. Se alguma regra falhar, ninguém chega ao banco.
+@Service
 public class UsuarioService implements UsuarioIService {
 
     // O DAO com quem o Service conversa. É o tipo da INTERFACE: o Service não sabe

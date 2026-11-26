@@ -6,10 +6,13 @@ import br.com.ifba.usuario.entity.Usuario;
 import br.com.ifba.usuario.service.UsuarioIService;
 // Tipo da lista que findAll e findByNome devolvem
 import java.util.List;
+// Anotação do Spring que registra esta classe no contêiner como a camada de CONTROLE
+import org.springframework.stereotype.Controller;
 
 // Controller de Usuario: recebe da tela e encaminha ao Service. É um mensageiro:
 // não valida nem altera nada, cada método tem uma linha.
 // Num app desktop ele só repassa; existe para espelhar a arquitetura web (Spring)
+@Controller
 public class UsuarioController implements UsuarioIController {
 
     // O Service com quem o Controller conversa (tipo da INTERFACE)

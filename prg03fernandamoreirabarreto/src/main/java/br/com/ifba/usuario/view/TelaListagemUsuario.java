@@ -8,13 +8,16 @@
    import javax.swing.table.DefaultTableModel;
       // Contrato do Controller: a tela só conhece a interface, nunca o DAO nem o Service
    import br.com.ifba.usuario.controller.UsuarioIController;
+    // Anotação do Spring que registra esta tela no contêiner (camada VIEW)
+import org.springframework.stereotype.Component;
+// Faz o Spring criar esta tela só quando alguém pedir, e não ao subir:
+// o construtor dela já consulta o banco, e isso só deve acontecer depois do login
+import org.springframework.context.annotation.Lazy;
    
 
 
-/**
- *
- * @author ferna
- */
+@Component
+@Lazy
 public class TelaListagemUsuario extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaListagemUsuario.class.getName());

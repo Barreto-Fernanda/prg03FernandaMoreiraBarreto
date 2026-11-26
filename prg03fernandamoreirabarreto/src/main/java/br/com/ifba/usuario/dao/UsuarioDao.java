@@ -10,11 +10,14 @@ import br.com.ifba.usuario.entity.Usuario;
 import jakarta.persistence.EntityManager;
 // Tipo do resultado das consultas
 import java.util.List;
+// Anotação do Spring que registra esta classe no contêiner como a camada de ACESSO A DADOS
+import org.springframework.stereotype.Repository;
 
 
 // DAO de Usuario: herda todo o CRUD do GenericDao e cumpre o contrato do UsuarioIDao.
 // O DAO não julga, só executa: as regras de negócio (como o login único)
 // ficam no UsuarioService. Aqui só entram as buscas próprias do domínio Usuario.
+@Repository
 public class UsuarioDao extends GenericDao<Usuario> implements UsuarioIDao {
 
     // super(Usuario.class) diz ao GenericDao com qual entidade este DAO trabalha
