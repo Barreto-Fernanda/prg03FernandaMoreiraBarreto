@@ -2,24 +2,32 @@ package br.com.ifba.usuario.view;
 import javax.swing.JOptionPane;
 import br.com.ifba.usuario.validar.ValidadorUsuario;
 import br.com.ifba.usuario.entity.Usuario;
-import br.com.ifba.login.view.TelaLogin;
 // Contrato do Controller: a tela só conhece a interface, nunca o DAO nem o Service
 import br.com.ifba.usuario.controller.UsuarioIController;
 // Tela de login, reaberta pelo botão Cancelar
 import br.com.ifba.login.view.TelaLogin;
 // Exceção de regra de negócio lançada pelo Service (CPF inválido, senha curta, palavra proibida)
 import br.com.ifba.infrastructure.exception.NegocioException;
-
 import br.com.ifba.usuario.exception.LoginDuplicadoException;
+// Anotação do Spring que registra esta tela no contêiner (camada VIEW)
+import org.springframework.stereotype.Component;
+// Cria a tela só quando alguém pedir (hoje ela é aberta com new, pelo login e pela listagem)
+import org.springframework.context.annotation.Lazy;
+// Indica ao Spring qual construtor usar, já que esta tela tem dois
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class TelaCadastroUsuario extends javax.swing.JFrame {
+    @Component
+    @Lazy
+    public class TelaCadastroUsuario extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaCadastroUsuario.class.getName());
 
               // Controller que recebe os pedidos da tela: ela só chama controller.save(...)
        private final UsuarioIController controller;
 
-       // Injeção de dependência: a tela RECEBE o Controller, não cria nada
+              // @Autowired no CONSTRUTOR: com dois construtores, o Spring precisa saber qual usar.
+       // O outro (com Usuario) só é chamado pela listagem, com new
+       @Autowired
        public TelaCadastroUsuario(UsuarioIController controller) {
            this.controller = controller;
            initComponents();

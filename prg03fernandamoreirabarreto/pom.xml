@@ -7,8 +7,8 @@
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>26</maven.compiler.release>
-        <exec.mainClass>com.mycompany.prg03fernandamoreirabarreto.Prg03fernandamoreirabarreto</exec.mainClass>
+        <maven.compiler.release>21</maven.compiler.release>
+        <exec.mainClass>br.com.ifba.ProjetoApplication</exec.mainClass>
     </properties>
     <dependencies>
         <dependency>
@@ -68,6 +68,14 @@
             <artifactId>flyway-mysql</artifactId>
             <!-- Mesma versão do flyway-core, para os dois funcionarem juntos -->
             <version>10.10.0</version>
+        </dependency>
+                <!-- Spring Boot (starter básico, NÃO o starter web): traz o contêiner que cria os
+             objetos e a busca de classes anotadas. A aplicação continua desktop:
+             nenhum servidor sobe. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <version>3.2.0</version>
         </dependency>
     </dependencies>
 </project>
